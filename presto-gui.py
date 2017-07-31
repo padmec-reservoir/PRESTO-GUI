@@ -46,11 +46,21 @@ class MyTableWidget(QtWidgets.QWidget):
         ##Define layout manager to Tab 1
         self.tab1.layout = QtWidgets.QGridLayout(self.tab1)
         ##Create the button
-        btn = QtWidgets.QPushButton("Quit", self)
-        btn.clicked.connect(Window.close_application)
+        self.tab1.btn = QtWidgets.QPushButton("Quit", self)
+        self.tab1.btn.clicked.connect(Window.close_application)
         ##Add the button to the layout manager
-        self.tab1.layout.addWidget(btn)
-
+        self.tab1.layout.addWidget(self.tab1.btn)
+        
+        #Text input to Tab 2
+        ##Define layout manager to Tab 1
+        self.tab2.layout = QtWidgets.QGridLayout(self.tab2)
+        ##Create and add 8 pairs of labels and text inputs to Tab 2
+        for i in range(1,5):
+            for j in range(1,3):
+                self.tab2.label = QtWidgets.QLabel("Input "+str((2*(i-1))+j), self)
+                self.tab2.textbox = QtWidgets.QLineEdit(self)
+                self.tab2.layout.addWidget(self.tab2.label, i, 2*j - 1)
+                self.tab2.layout.addWidget(self.tab2.textbox, i, 2*j)
         # Add tabs
         self.tabs.addTab(self.tab1,"Tab 1")
         self.tabs.addTab(self.tab2,"Tab 2")
