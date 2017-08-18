@@ -8,11 +8,14 @@ parameter_list = ["param1", "param2", "result"]
 
 
 class Window(QtWidgets.QMainWindow):
-    def __init__(self, parameters=None):
+    def __init__(self, parameters=None, pintDict=None):
         super(Window, self).__init__()
         if not parameters:
             parameters = {}
+        if not pintDict:
+            pintDict = {}
         self.param = parameters
+        self.pintDict = pintDict
         self.setGeometry(50, 50, 300, 300)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QtGui.QIcon('presto-logo.png'))
@@ -101,12 +104,12 @@ class MyTableWidget(QtWidgets.QTabWidget):
         # Creating and binding functions to text input and dropdown 1
         self.tab1.row2.prm1 = QtWidgets.QLineEdit(self.tab1.row2)
         self.tab1.row2.prm1.textEdited.connect(self.get_param1)
-        self.tab1.row2.prm1_dpdown = MyComboBox(self.tab1.row2, parent.ureg)
+        self.tab1.row2.prm1_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "area")
         self.tab1.row2.prm1_dpdown.currentTextChanged.connect(self.get_dpdown1)
         # Creating and binding functions to text input and dropdown 2
         self.tab1.row2.prm2 = QtWidgets.QLineEdit(self.tab1.row2)
         self.tab1.row2.prm2.textEdited.connect(self.get_param2)
-        self.tab1.row2.prm2_dpdown = MyComboBox(self.tab1.row2, parent.ureg)
+        self.tab1.row2.prm2_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "area")
         self.tab1.row2.prm2_dpdown.currentTextChanged.connect(self.get_dpdown2)
         # Setting up the layout of second row
         self.tab1.row2.layout.addWidget(self.tab1.row2.prm1, 1, 1)
@@ -156,6 +159,7 @@ class MyTableWidget(QtWidgets.QTabWidget):
         self.tab1.row3Result.setText(str(res.magnitude)+" "+str(res.units))
 
     def update_parameters(self):
+        # Refactor this method
         self.tab1.row2.prm1.setText(str(self.parent.param["param1"][0]))
         self.tab1.row2.prm2.setText(str(self.parent.param["param2"][0]))
         self.tab1.row2.prm1_dpdown.setCurrentText(
@@ -168,24 +172,41 @@ class MyTableWidget(QtWidgets.QTabWidget):
 
 
 class MyComboBox(QtWidgets.QComboBox):
-    def __init__(self, parent, ureg):
+    def __init__(self, parent, ureg, dimension):
         super(MyComboBox, self).__init__(parent)
         # Create list of units
-        self.unitList = ([""] +
-                         list(
-                            set([a for a in ureg._units.keys() and
-                                [x._name for x in ureg._units.values()]])))
-        self.unitList.sort()
-        for x in self.unitList:
+        self.units = {"area" : ["acre", "ft2", "in2", "m2"],
+                      "density" : ["kg/m3", "lb/ft3", "lb/gal", "lb/in3"],
+                      "length" : ["ft", "m", "in", "yd"],
+                      "mass_flow" : ["kg/day", "lb/day"],
+                      "pressure" : ["Pa", "psi"],
+                      "volume" : ["bbl", "ft3", "gal", "in3", "m3"],
+                      "volume_flow" : ["bbl/day", "ft3/day", "gal/day"],
+                      "weigth" : ["kg", "lb"],
+                      "weigth_per_length" : ["kg/m", "lb/ft", "lb/in"]}
+
+        self.addItem("-- Choose Unit")
+        for x in self.units[dimension]:
             self.addItem(x)
 
 
 if __name__ == '__main__':
     # Create list of parameters values based om parameter list
     parametersValues = {}
+    pintDict = {"ft2" : "square_foot", "m" : "meter", "in2" : "square_inch",
+                "m" : "meter ** 2", "in" : "inch", "lb/in" : "pound / inch",
+                "kg/m3" : "kilogram / meter ** 3", "bbl" : "dry_barrel",
+                "lb/ft3" : "pound / foot ** 3", "lb/in3" : "pound / inch ** 3",
+                "kg/day" : "kilogram / day", "yd" : "yard", "gal" "dry_gallon",
+                "lb/day" : "pound / day", "m3" : "meter ** 3", "ft" : "foot",
+                "ft3" : "foot ** 3", "in3" : "inch ** 3", "lb" : "pound",
+                "bbl/day" : "dry_barrel / day", "ft3/day" : "foot ** 3 / day",
+                "gal/day" : "dry_gallon / day", "lb/ft" : "pound / foot",
+                "kg" : "kilogram", "kg/m" : "kilogram / meter",
+                "lb/gal" : "pound / dry_gallon"}
     for x in parameter_list:
         parametersValues[x] = (0.0, "")
     app = QtWidgets.QApplication(sys.argv)
-    GUI = Window(parametersValues)
+    GUI = Window(parametersValues, pintDict)
     app.exec_()
     sys.exit()
