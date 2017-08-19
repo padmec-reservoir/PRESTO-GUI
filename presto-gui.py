@@ -5,17 +5,34 @@ from configobj import ConfigObj
 
 # Create list of parameters
 parameter_list = ["param1", "param2", "result"]
+dropdown_list = ["param1", "param2", "result", "dim"]
+unit_dict = {"dims" : ["Area", "Density", "Length", "Mass Flow", "Pressure",
+                       "Volume", "Volume Flow", "Weigth", "Weigth per Length"],
+             "Area" : ["acre", "square_foot", "square_inch", "meter ** 2"],
+             "Density" : ["kilogram / meter ** 3", "pound / foot ** 3",
+                          "pound / dry_gallon", "pound / inch ** 3"],
+             "Length" : ["foot", "meter", "inch", "yard"],
+             "Mass Flow" : ["kilogram / day", "pound / day"],
+             "Pressure" : ["Pa", "psi"],
+             "Volume" : ["dry_barrel", "foot ** 3", "dry_gallon", "inch ** 3",
+                         "meter ** 3"],
+             "Volume Flow" : ["dry_barrel / day", "foot ** 3 / day",
+                              "dry_gallon / day"],
+             "Weigth" : ["kilogram", "pound"],
+             "Weigth per Length" : ["kilogram / meter", "pound / foot",
+                                    "pound / inch"],
+             "idle" : None}
 
 
 class Window(QtWidgets.QMainWindow):
-    def __init__(self, parameters=None, pintDict=None):
+    def __init__(self, parameters=None, dropdown=None):
         super(Window, self).__init__()
         if not parameters:
             parameters = {}
-        if not pintDict:
-            pintDict = {}
         self.param = parameters
-        self.pintDict = pintDict
+        if not dropdown:
+            dropdown = {}
+        self.dpdown = dropdown
         self.setGeometry(50, 50, 300, 300)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QtGui.QIcon('presto-logo.png'))
@@ -63,14 +80,20 @@ class Window(QtWidgets.QMainWindow):
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
         file = ConfigObj(name[0])
         for x in parameter_list:
-            self.param[x] = (float(file[x][0]), str(file[x][1]))
+            self.param[x] = float(file["parameters"][x])
+        for x in dropdown_list:
+            self.dpdown[x] = file["dropdowns"][x]
         self.table_widget.update_parameters()
 
     def save_file(self):
         name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
         file = ConfigObj(name[0])
+        file["parameters"] = {}
         for x in parameter_list:
-            file[x] = self.param[x]
+            file["parameters"][x] = self.param[x]
+        file["dropdowns"] = {}
+        for x in dropdown_list:
+            file["dropdowns"][x] = self.dpdown[x]
         file.write()
 
 
@@ -85,18 +108,18 @@ class MyAction(QtWidgets.QAction):
 class MyTableWidget(QtWidgets.QTabWidget):
     def __init__(self, parent):
         super(MyTableWidget, self).__init__(parent)
-        # Define layout
         self.parent = parent
+        # Define layout
         self.layout = QtWidgets.QVBoxLayout(self)
         # Make first tab
         self.tab1 = QtWidgets.QWidget()
         # Define layout of tab 1
         self.tab1.layout = QtWidgets.QFormLayout(self.tab1)
         # First Row
-        self.tab1.row1_label = QtWidgets.QLabel("Exit", self.tab1)
-        self.tab1.row1_button = QtWidgets.QPushButton("Quit", self.tab1)
-        self.tab1.row1_button.clicked.connect(parent.close_application)
-        self.tab1.layout.addRow(self.tab1.row1_label, self.tab1.row1_button)
+        self.tab1.row1_label = QtWidgets.QLabel("Dimension", self.tab1)
+        self.tab1.row1_dim = MyComboBox(self.tab1, parent.ureg, "dims")
+        self.tab1.row1_dim.currentTextChanged.connect(self.get_dim)
+        self.tab1.layout.addRow(self.tab1.row1_label, self.tab1.row1_dim)
         # Second Row
         self.tab1.row2 = QtWidgets.QWidget()
         self.tab1.row2.label = QtWidgets.QLabel("Parameters", self.tab1.row2)
@@ -104,12 +127,12 @@ class MyTableWidget(QtWidgets.QTabWidget):
         # Creating and binding functions to text input and dropdown 1
         self.tab1.row2.prm1 = QtWidgets.QLineEdit(self.tab1.row2)
         self.tab1.row2.prm1.textEdited.connect(self.get_param1)
-        self.tab1.row2.prm1_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "area")
+        self.tab1.row2.prm1_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "idle")
         self.tab1.row2.prm1_dpdown.currentTextChanged.connect(self.get_dpdown1)
         # Creating and binding functions to text input and dropdown 2
         self.tab1.row2.prm2 = QtWidgets.QLineEdit(self.tab1.row2)
         self.tab1.row2.prm2.textEdited.connect(self.get_param2)
-        self.tab1.row2.prm2_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "area")
+        self.tab1.row2.prm2_dpdown = MyComboBox(self.tab1.row2, parent.ureg, "idle")
         self.tab1.row2.prm2_dpdown.currentTextChanged.connect(self.get_dpdown2)
         # Setting up the layout of second row
         self.tab1.row2.layout.addWidget(self.tab1.row2.prm1, 1, 1)
@@ -130,7 +153,7 @@ class MyTableWidget(QtWidgets.QTabWidget):
             value = float(text)
         except ValueError:
             value = 0.0
-        self.parent.param["param1"] = (value, self.parent.param["param1"][1])
+        self.parent.param["param1"] = value
         self.set_result()
 
     def get_param2(self, text):
@@ -138,75 +161,74 @@ class MyTableWidget(QtWidgets.QTabWidget):
             value = float(text)
         except ValueError:
             value = 0.0
-        self.parent.param["param2"] = (value, self.parent.param["param2"][1])
+        self.parent.param["param2"] = value
         self.set_result()
 
     def get_dpdown1(self, text):
-        self.parent.param["param1"] = (self.parent.param["param1"][0], text)
+        if text == "-- Choose Unit":
+            text = ""
+        self.parent.dpdown["param1"] = text
         self.set_result()
 
     def get_dpdown2(self, text):
-        self.parent.param["param2"] = (self.parent.param["param2"][0], text)
+        if text == "-- Choose Unit":
+            text = ""
+        self.parent.dpdown["param2"] = text
         self.set_result()
 
+    def get_dim(self, text):
+        self.parent.dpdown["dim"] = text
+        while self.tab1.row2.prm1_dpdown.count() > 1:
+            self.tab1.row2.prm1_dpdown.removeItem(1)
+            self.tab1.row2.prm2_dpdown.removeItem(1)
+        if text != "-- Choose Dimension":
+            for x in unit_dict[text]:
+                self.tab1.row2.prm1_dpdown.addItem(x)
+                self.tab1.row2.prm2_dpdown.addItem(x)
+
     def set_result(self):
-        param1 = (self.parent.param["param1"][0] *
-                  self.parent.ureg(self.parent.param["param1"][1]))
-        param2 = (self.parent.param["param2"][0] *
-                  self.parent.ureg(self.parent.param["param2"][1]))
+        param1_value = self.parent.param["param1"]
+        param1_unit = self.parent.dpdown["param1"]
+        param2_value = self.parent.param["param2"]
+        param2_unit = self.parent.dpdown["param2"]
+        param1 = param1_value * self.parent.ureg(param1_unit)
+        param2 = param2_value * self.parent.ureg(param2_unit)
         res = param1 * param2
-        self.parent.param["result"] = (res.magnitude, str(res.units))
+        self.parent.param["result"] = res.magnitude
+        self.parent.dpdown["result"] = str(res.units)
         self.tab1.row3Result.setText(str(res.magnitude)+" "+str(res.units))
 
     def update_parameters(self):
         # Refactor this method
-        self.tab1.row2.prm1.setText(str(self.parent.param["param1"][0]))
-        self.tab1.row2.prm2.setText(str(self.parent.param["param2"][0]))
-        self.tab1.row2.prm1_dpdown.setCurrentText(
-            self.parent.param["param1"][1])
-        self.tab1.row2.prm2_dpdown.setCurrentText(
-            self.parent.param["param2"][1])
-        self.tab1.row3Result.setText(str(self.parent.param["result"][0]) +
-                                     " " +
-                                     self.parent.param["result"][1])
+        self.tab1.row2.prm1.setText(str(self.parent.param["param1"]))
+        self.tab1.row2.prm2.setText(str(self.parent.param["param2"]))
+        self.tab1.row3Result.setText(str(self.parent.param["result"]) + " " +
+                                     self.parent.dpdown["result"])
+        self.tab1.row1_dim.setCurrentText(self.parent.dpdown["dim"])
+        self.tab1.row2.prm1_dpdown.setCurrentText(self.parent.dpdown["param1"])
+        self.tab1.row2.prm2_dpdown.setCurrentText(self.parent.dpdown["param2"])
 
 
 class MyComboBox(QtWidgets.QComboBox):
     def __init__(self, parent, ureg, dimension):
         super(MyComboBox, self).__init__(parent)
-        # Create list of units
-        self.units = {"area" : ["acre", "ft2", "in2", "m2"],
-                      "density" : ["kg/m3", "lb/ft3", "lb/gal", "lb/in3"],
-                      "length" : ["ft", "m", "in", "yd"],
-                      "mass_flow" : ["kg/day", "lb/day"],
-                      "pressure" : ["Pa", "psi"],
-                      "volume" : ["bbl", "ft3", "gal", "in3", "m3"],
-                      "volume_flow" : ["bbl/day", "ft3/day", "gal/day"],
-                      "weigth" : ["kg", "lb"],
-                      "weigth_per_length" : ["kg/m", "lb/ft", "lb/in"]}
-
-        self.addItem("-- Choose Unit")
-        for x in self.units[dimension]:
-            self.addItem(x)
+        if dimension == "dims":
+            self.addItem("-- Choose Dimension")
+            for x in unit_dict[dimension]:
+                self.addItem(x)
+        else:
+            self.addItem("-- Choose Unit")
 
 
 if __name__ == '__main__':
     # Create list of parameters values based om parameter list
-    parametersValues = {}
-    pintDict = {"ft2" : "square_foot", "m" : "meter", "in2" : "square_inch",
-                "m" : "meter ** 2", "in" : "inch", "lb/in" : "pound / inch",
-                "kg/m3" : "kilogram / meter ** 3", "bbl" : "dry_barrel",
-                "lb/ft3" : "pound / foot ** 3", "lb/in3" : "pound / inch ** 3",
-                "kg/day" : "kilogram / day", "yd" : "yard", "gal" "dry_gallon",
-                "lb/day" : "pound / day", "m3" : "meter ** 3", "ft" : "foot",
-                "ft3" : "foot ** 3", "in3" : "inch ** 3", "lb" : "pound",
-                "bbl/day" : "dry_barrel / day", "ft3/day" : "foot ** 3 / day",
-                "gal/day" : "dry_gallon / day", "lb/ft" : "pound / foot",
-                "kg" : "kilogram", "kg/m" : "kilogram / meter",
-                "lb/gal" : "pound / dry_gallon"}
+    parameters_values = {}
+    dropdown_values = {}
     for x in parameter_list:
-        parametersValues[x] = (0.0, "")
+        parameters_values[x] = 0.0
+    for x in dropdown_list:
+        dropdown_values[x] = ""
     app = QtWidgets.QApplication(sys.argv)
-    GUI = Window(parametersValues, pintDict)
+    GUI = Window(parameters_values, dropdown_values)
     app.exec_()
     sys.exit()
