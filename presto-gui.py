@@ -9,25 +9,25 @@ parameter_list = ["Pressao inicial", "Pressao barometrica", "Poco produtor",
                   "Densidade", "Viscosidade", "Altura", "Area", "Porosidade",
                   "Permeabilidade"]
 dimension_list = ["Pressure", "Pressure", "Volume Flow", "Volume Flow",
-    	          "Volume Flow", "Time", "Density", "Viscosity", "Length",
+                  "Volume Flow", "Time", "Density", "Viscosity", "Length",
                   "Area", "Dimensionless", "Dimensionless"]
-unit_dict = {"Area" : ["acre", "square_foot", "square_inch", "meter ** 2"],
-             "Density" : ["kilogram / meter ** 3", "pound / foot ** 3",
-                          "pound / dry_gallon", "pound / inch ** 3"],
-             "Length" : ["foot", "meter", "inch", "yard"],
-             "Mass Flow" : ["kilogram / day", "pound / day"],
-             "Pressure" : ["Pa", "psi"],
-             "Volume" : ["dry_barrel", "foot ** 3", "dry_gallon", "inch ** 3",
-                         "meter ** 3"],
-             "Volume Flow" : ["dry_barrel / day", "foot ** 3 / day",
-                              "dry_gallon / day"],
-             "Weigth" : ["kilogram", "pound"],
-             "Weigth per Length" : ["kilogram / meter", "pound / foot",
-                                    "pound / inch"],
-             "Time" : ["second", "minute", "hour", "day", "week", "month",
-                       "year"],
-             "Viscosity" : ["centipoise", "stokes", "rhe"],
-             "Dimensionless" : [""]}
+unit_dict = {"Area": ["acre", "square_foot", "square_inch", "meter ** 2"],
+             "Density": ["kilogram / meter ** 3", "pound / foot ** 3",
+                         "pound / dry_gallon", "pound / inch ** 3"],
+             "Length": ["foot", "meter", "inch", "yard"],
+             "Mass Flow": ["kilogram / day", "pound / day"],
+             "Pressure": ["Pa", "psi"],
+             "Volume": ["dry_barrel", "foot ** 3", "dry_gallon", "inch ** 3",
+                        "meter ** 3"],
+             "Volume Flow": ["dry_barrel / day", "foot ** 3 / day",
+                             "dry_gallon / day"],
+             "Weigth": ["kilogram", "pound"],
+             "Weigth per Length": ["kilogram / meter", "pound / foot",
+                                   "pound / inch"],
+             "Time": ["second", "minute", "hour", "day", "week", "month",
+                      "year"],
+             "Viscosity": ["centipoise", "stokes", "rhe"],
+             "Dimensionless": [""]}
 
 
 class Window(QtWidgets.QMainWindow):
@@ -148,9 +148,9 @@ class MyTableWidget(QtWidgets.QTabWidget):
         i = 0
         j = 1
         for x in parameter_list:
-            layout.addWidget(layout.labels[x], (i%6) + 1, j)
-            layout.addWidget(layout.inputs[x], (i%6) + 1, j + 1)
-            layout.addWidget(layout.boxes[x], (i%6) + 1, j + 2)
+            layout.addWidget(layout.labels[x], (i % 6) + 1, j)
+            layout.addWidget(layout.inputs[x], (i % 6) + 1, j + 1)
+            layout.addWidget(layout.boxes[x], (i % 6) + 1, j + 2)
             i = i + 1
             if i >= 6:
                 j = 4
