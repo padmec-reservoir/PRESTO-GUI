@@ -33,9 +33,9 @@ unit_dict = {"Area": ["acre", "square_foot", "square_inch", "meter ** 2"],
 class Window(QtWidgets.QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.value = {}
-        self.unit = {}
-        self.setGeometry(50, 50, 500, 500)
+        self.value = dict((x, 0) for x in parameter_list)
+        self.unit = dict((x, "") for x in parameter_list)
+        self.setGeometry(50, 50, 700, 500)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QtGui.QIcon('presto-logo.png'))
         self.ureg = pint.UnitRegistry()
@@ -48,7 +48,7 @@ class Window(QtWidgets.QMainWindow):
                 "&Exit",
                 "Ctrl+Q",
                 "Leave the app",
-                self.close_application))
+                sys.exit))
         self.file_menu.addAction(
             MyAction(
                 self,
@@ -74,27 +74,24 @@ class Window(QtWidgets.QMainWindow):
         # Show
         self.show()
 
-    def close_application(self):
-        print("Exiting!")
-        sys.exit()
-
     def open_file(self):
         name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
-        file = ConfigObj(name[0])
+        config_file = ConfigObj(name[0])
         for x in parameter_list:
-            self.value[x] = file["values"][x]
-            self.unit[x] = file["units"][x]
+            self.value[x] = config_file["values"][x]
+            self.unit[x] = config_file["units"][x]
         self.table_widget.update_parameters()
 
     def save_file(self):
+        # Need data validation on values and units
         name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
-        file = ConfigObj(name[0])
-        file["values"] = {}
-        file["units"] = {}
+        config_file = ConfigObj(name[0])
+        config_file["values"] = {}
+        config_file["units"] = {}
         for x in parameter_list:
-            file["values"][x] = self.value[x]
-            file["units"][x] = self.unit[x]
-        file.write()
+            config_file["values"][x] = self.value[x]
+            config_file["units"][x] = self.unit[x]
+        config_file.write()
 
 
 class MyAction(QtWidgets.QAction):
@@ -136,7 +133,7 @@ class MyTableWidget(QtWidgets.QTabWidget):
         i = 0
         for x in parameter_list:
             boxes[x] = MyComboBox(parent, self.parent.ureg, dimension_list[i])
-            boxes[x].editTextChanged.connect(self.get_unit)
+            boxes[x].currentTextChanged.connect(self.get_unit)
             i = i + 1
         return boxes
 
@@ -163,26 +160,20 @@ class MyTableWidget(QtWidgets.QTabWidget):
             except ValueError:
                 cur = 0.0
             self.parent.value[x] = cur
-        self.dbg(1)
 
     def get_unit(self, text):
         for x in parameter_list:
             self.parent.unit[x] = self.tab1.layout.boxes[x].currentText()
-        self.dbg(2)
 
     def update_parameters(self):
+        old_state = {}
+        for x in self.tab1.layout.boxes:
+            old_state[x] = self.tab1.layout.boxes[x].blockSignals(True)
         for x in parameter_list:
             self.tab1.layout.inputs[x].setText(self.parent.value[x])
             self.tab1.layout.boxes[x].setCurrentText(self.parent.unit[x])
-
-    def dbg(self, opt):
-        if opt == 1:
-            for x in parameter_list:
-                print(self.parent.value[x])
-        else:
-            for x in parameter_list:
-                print(self.parent.unit[x])
-        print()
+        for x in self.tab1.layout.boxes:
+            self.tab1.layout.boxes[x].blockSignals(old_state[x])
 
 
 class MyComboBox(QtWidgets.QComboBox):
