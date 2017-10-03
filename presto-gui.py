@@ -109,11 +109,16 @@ class MyTableWidget(QtWidgets.QTabWidget):
         # Define layout
         self.layout = QtWidgets.QGridLayout(self)
         # Make first tab
-        self.tab1 = QtWidgets.QWidget()
+        self.tab1 = QtWidgets.QWidget(self)
         # Define layout of tab 1
         self.tab1.layout = self.make_tab1_layout()
+        # Make second tab
+        self.tab2 = QtWidgets.QWidget(self)
+        # Define layout of tab 2
+        self.tab2.tree_view = self.make_tab2_tree(self.tab2)
         # Add tabs to tab screen
         self.addTab(self.tab1, "Tab 1")
+        self.addTab(self.tab2, "Tab 2")
 
     def make_labels(self, parent):
         labels = {}
@@ -152,6 +157,18 @@ class MyTableWidget(QtWidgets.QTabWidget):
             if i >= 6:
                 j = 4
         return layout
+
+    def make_tab2_tree(self, parent):
+        units = QtWidgets.QTreeWidgetItem(["Unit Systems"])
+        units_si = QtWidgets.QTreeWidgetItem(["SI"])
+        units_imperial = QtWidgets.QTreeWidgetItem(["Imperial Units"])
+        units_field = QtWidgets.QTreeWidgetItem(["Field Units"])
+        units.addChild(units_si)
+        units.addChild(units_imperial)
+        units.addChild(units_field)
+        tree_widget = QtWidgets.QTreeWidget(parent)
+        tree_widget.addTopLevelItem(units)
+
 
     def get_value(self, text):
         for x in parameter_list:
