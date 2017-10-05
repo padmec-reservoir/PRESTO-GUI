@@ -1,43 +1,22 @@
 import sys
 import pint
-from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import (QMainWindow, QApplication, QAction, QGridLayout,
+                             QFileDialog, QTabWidget, QComboBox, QLabel,
+                             QLineEdit, QTreeWidget, QTreeWidgetItem, QWidget)
+from PyQt5.QtGui import QIcon
 from configobj import ConfigObj
-
-# Create list of parameters
-parameter_list = ["Pressao inicial", "Pressao barometrica", "Poco produtor",
-                  "Poco injetor 1", "Poco injetor 2", "Tempo de injecao",
-                  "Densidade", "Viscosidade", "Altura", "Area", "Porosidade",
-                  "Permeabilidade"]
-dimension_list = ["Pressure", "Pressure", "Volume Flow", "Volume Flow",
-                  "Volume Flow", "Time", "Density", "Viscosity", "Length",
-                  "Area", "Dimensionless", "Dimensionless"]
-unit_dict = {"Area": ["acre", "square_foot", "square_inch", "meter ** 2"],
-             "Density": ["kilogram / meter ** 3", "pound / foot ** 3",
-                         "pound / dry_gallon", "pound / inch ** 3"],
-             "Length": ["foot", "meter", "inch", "yard"],
-             "Mass Flow": ["kilogram / day", "pound / day"],
-             "Pressure": ["Pa", "psi"],
-             "Volume": ["dry_barrel", "foot ** 3", "dry_gallon", "inch ** 3",
-                        "meter ** 3"],
-             "Volume Flow": ["dry_barrel / day", "foot ** 3 / day",
-                             "dry_gallon / day"],
-             "Weigth": ["kilogram", "pound"],
-             "Weigth per Length": ["kilogram / meter", "pound / foot",
-                                   "pound / inch"],
-             "Time": ["second", "minute", "hour", "day", "week", "month",
-                      "year"],
-             "Viscosity": ["centipoise", "stokes", "rhe"],
-             "Dimensionless": [""]}
+from parameters import *
 
 
-class Window(QtWidgets.QMainWindow):
+class Window(QMainWindow):
     def __init__(self):
         super(Window, self).__init__()
-        self.value = dict((x, 0) for x in parameter_list)
-        self.unit = dict((x, "") for x in parameter_list)
+        self.value = dict((x[0], 0) for x in parameter_list)
+        self.unit = dict((x[0], "") for x in parameter_list)
         self.setGeometry(50, 50, 700, 500)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
-        self.setWindowIcon(QtGui.QIcon('presto-logo.png'))
+        self.setWindowIcon(QIcon('presto-logo.png'))
         self.ureg = pint.UnitRegistry()
         # Menubar
         self.main_menu = self.menuBar()
@@ -75,26 +54,26 @@ class Window(QtWidgets.QMainWindow):
         self.show()
 
     def open_file(self):
-        name = QtWidgets.QFileDialog.getOpenFileName(self, 'Open File')
+        name = QFileDialog.getOpenFileName(self, 'Open File')
         config_file = ConfigObj(name[0])
         for x in parameter_list:
-            self.value[x] = config_file["values"][x]
-            self.unit[x] = config_file["units"][x]
+            self.value[x[0]] = config_file["values"][x[0]]
+            self.unit[x[0]] = config_file["units"][x[0]]
         self.table_widget.update_parameters()
 
     def save_file(self):
         # Need data validation on values and units
-        name = QtWidgets.QFileDialog.getSaveFileName(self, 'Save File')
+        name = QFileDialog.getSaveFileName(self, 'Save File')
         config_file = ConfigObj(name[0])
         config_file["values"] = {}
         config_file["units"] = {}
         for x in parameter_list:
-            config_file["values"][x] = self.value[x]
-            config_file["units"][x] = self.unit[x]
+            config_file["values"][x[0]] = self.value[x[0]]
+            config_file["units"][x[0]] = self.unit[x[0]]
         config_file.write()
 
 
-class MyAction(QtWidgets.QAction):
+class MyAction(QAction):
     def __init__(self, parent, name, shortcut, status, function):
         super(MyAction, self).__init__(name, parent)
         self.setShortcut(shortcut)
@@ -102,18 +81,18 @@ class MyAction(QtWidgets.QAction):
         self.triggered.connect(function)
 
 
-class MyTableWidget(QtWidgets.QTabWidget):
+class MyTableWidget(QTabWidget):
     def __init__(self, parent):
         super(MyTableWidget, self).__init__(parent)
         self.parent = parent
         # Define layout
-        self.layout = QtWidgets.QGridLayout(self)
+        self.layout = QGridLayout(self)
         # Make first tab
-        self.tab1 = QtWidgets.QWidget(self)
+        self.tab1 = QWidget(self)
         # Define layout of tab 1
         self.tab1.layout = self.make_tab1_layout()
         # Make second tab
-        self.tab2 = QtWidgets.QWidget(self)
+        self.tab2 = QWidget(self)
         # Define layout of tab 2
         self.tab2.tree_view = self.make_tab2_tree(self.tab2)
         # Add tabs to tab screen
@@ -123,86 +102,98 @@ class MyTableWidget(QtWidgets.QTabWidget):
     def make_labels(self, parent):
         labels = {}
         for x in parameter_list:
-            labels[x] = QtWidgets.QLabel(x, parent)
+            labels[x[0]] = QLabel(x[0], parent)
         return labels
 
     def make_inputs(self, parent):
         inputs = {}
         for x in parameter_list:
-            inputs[x] = QtWidgets.QLineEdit(parent)
-            inputs[x].textEdited.connect(self.get_value)
+            inputs[x[0]] = QLineEdit(parent)
+            inputs[x[0]].textEdited.connect(self.get_value)
         return inputs
 
     def make_dropdowns(self, parent):
         boxes = {}
-        i = 0
+        unit_system = start_unit
         for x in parameter_list:
-            boxes[x] = MyComboBox(parent, self.parent.ureg, dimension_list[i])
-            boxes[x].currentTextChanged.connect(self.get_unit)
-            i = i + 1
+            boxes[x[0]] = MyComboBox(parent, unit_system, x[1])
+            boxes[x[0]].currentTextChanged.connect(self.get_unit)
         return boxes
 
     def make_tab1_layout(self):
-        layout = QtWidgets.QGridLayout(self.tab1)
+        layout = QGridLayout(self.tab1)
         layout.labels = self.make_labels(self.tab1)
         layout.inputs = self.make_inputs(self.tab1)
         layout.boxes = self.make_dropdowns(self.tab1)
         i = 0
         j = 1
         for x in parameter_list:
-            layout.addWidget(layout.labels[x], (i % 6) + 1, j)
-            layout.addWidget(layout.inputs[x], (i % 6) + 1, j + 1)
-            layout.addWidget(layout.boxes[x], (i % 6) + 1, j + 2)
+            layout.addWidget(layout.labels[x[0]], (i % 6) + 1, j)
+            layout.addWidget(layout.inputs[x[0]], (i % 6) + 1, j + 1)
+            layout.addWidget(layout.boxes[x[0]], (i % 6) + 1, j + 2)
             i = i + 1
             if i >= 6:
                 j = 4
         return layout
 
     def make_tab2_tree(self, parent):
-        units = QtWidgets.QTreeWidgetItem(["Unit Systems"])
-        units_si = QtWidgets.QTreeWidgetItem(["SI"])
-        units_imperial = QtWidgets.QTreeWidgetItem(["Imperial Units"])
-        units_field = QtWidgets.QTreeWidgetItem(["Field Units"])
-        units.addChild(units_si)
-        units.addChild(units_imperial)
-        units.addChild(units_field)
-        tree_widget = QtWidgets.QTreeWidget(parent)
-        tree_widget.addTopLevelItem(units)
-
+        tree_widget = QTreeWidget(parent)
+        tree_widget.setHeaderLabel("Options")
+        tree_widget.itemClicked.connect(self.update_units)
+        tree_widget.units = QTreeWidgetItem(tree_widget, ["Unit Systems"])
+        for x in units_systems:
+            child = QTreeWidgetItem(tree_widget.units, [x])
+            child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+            child.setCheckState(0, Qt.Unchecked)
+            tree_widget.units.addChild(child)
+        tree_widget.addTopLevelItem(tree_widget.units)
+        return tree_widget
 
     def get_value(self, text):
         for x in parameter_list:
             try:
-                cur = float(self.tab1.layout.inputs[x].text())
+                cur = float(self.tab1.layout.inputs[x[0]].text())
             except ValueError:
                 cur = 0.0
             self.parent.value[x] = cur
 
     def get_unit(self, text):
         for x in parameter_list:
-            self.parent.unit[x] = self.tab1.layout.boxes[x].currentText()
+            self.parent.unit[x[0]] = self.tab1.layout.boxes[x[0]].currentText()
 
     def update_parameters(self):
         old_state = {}
         for x in self.tab1.layout.boxes:
             old_state[x] = self.tab1.layout.boxes[x].blockSignals(True)
         for x in parameter_list:
-            self.tab1.layout.inputs[x].setText(self.parent.value[x])
-            self.tab1.layout.boxes[x].setCurrentText(self.parent.unit[x])
+            self.tab1.layout.inputs[x[0]].setText(self.parent.value[x[0]])
+            self.tab1.layout.boxes[x[0]].setCurrentText(self.parent.unit[x[0]])
         for x in self.tab1.layout.boxes:
-            self.tab1.layout.boxes[x].blockSignals(old_state[x])
+            self.tab1.layout.boxes[x[0]].blockSignals(old_state[x[0]])
+
+    def update_units(self, item, col):
+        for x in parameter_list:
+            while self.tab1.layout.boxes[x[0]].count() > 1:
+                self.tab1.layout.boxes[x[0]].removeItem(1)
+        unit_list = [si_units, imperial_units, field_units]
+        for x in range(self.tab2.tree_view.units.childCount()):
+            if (self.tab2.tree_view.units.child(x).checkState(0) & Qt.Checked):
+                y = unit_list[x]
+                for p in parameter_list:
+                    for k in y[p[1]]:
+                        self.tab1.layout.boxes[p[0]].addItem(k)
 
 
-class MyComboBox(QtWidgets.QComboBox):
-    def __init__(self, parent, ureg, dimension):
+class MyComboBox(QComboBox):
+    def __init__(self, parent, unit_system, dimension):
         super(MyComboBox, self).__init__(parent)
         self.addItem("-- Choose Unit")
-        for x in unit_dict[dimension]:
+        for x in unit_system[dimension]:
             self.addItem(x)
 
 
 if __name__ == '__main__':
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication(sys.argv)
     GUI = Window()
     app.exec_()
     sys.exit()
