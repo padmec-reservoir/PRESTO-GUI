@@ -1,10 +1,6 @@
 parameter_list = [["Area", "Area"], ["Altura", "Length"],
-                  ["Densidade", "Density"], ["Pressao inicial", "Pressure"],
+                  ["Pressao inicial", "Pressure"],
                   ["Pressao barometrica", "Pressure"],
-                  ["Tempo de injecao", "Time"], ["Viscosidade", "Viscosity"],
-                  ["Poco injetor 1", "Volume Flow"],
-                  ["Poco injetor 2", "Volume Flow"],
-                  ["Poco produtor", "Volume Flow"],
                   ["Porosidade", "Dimensionless"],
                   ["Permeabilidade", "Dimensionless"]]
 units_systems = ["SI", "Imperial Units", "Field Units"]
