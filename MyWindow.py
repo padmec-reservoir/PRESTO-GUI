@@ -8,11 +8,10 @@ from MyTableWidget import MyTableWidget
 
 
 class MyWindow(QMainWindow):
-    def __init__(self, parameter_list):
+    def __init__(self, parameter_list, fluids):
         super(MyWindow, self).__init__()
         self.parameter_list = parameter_list
-        self.value = dict((x[0], 0) for x in self.parameter_list)
-        self.unit = dict((x[0], "") for x in self.parameter_list)
+        self.fluids = fluids
         self.setGeometry(50, 50, 700, 500)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QIcon('presto-logo.png'))
@@ -46,24 +45,52 @@ class MyWindow(QMainWindow):
         self.statusBar()
 
         # Tabs
-        self.table_widget = MyTableWidget(self, self.parameter_list)
-        self.setCentralWidget(self.table_widget)
+        self.table = MyTableWidget(self, self.parameter_list, self.fluids)
+        self.setCentralWidget(self.table)
 
     def open_file(self):
         name = QFileDialog.getOpenFileName(self, 'Open File')
+        if not name[0]:
+            return
         config_file = ConfigObj(name[0])
+        self.table.checked_units.clear()
+        for x in config_file["systems"]:
+            self.table.checked_units.add(x)
         for x in self.parameter_list:
-            self.value[x[0]] = config_file["values"][x[0]]
-            self.unit[x[0]] = config_file["units"][x[0]]
-        self.table_widget.update_parameters()
+            self.table.tab1.value[x[0]] = config_file["tab1"]["values"][x[0]]
+            self.table.tab1.unit[x[0]] = config_file["tab1"]["units"][x[0]]
+        for x in self.fluids:
+            self.table.tab2.oil.value[x[0]] = config_file["tab2"]["oil"]["values"][x[0]]
+            self.table.tab2.oil.unit[x[0]] = config_file["tab2"]["oil"]["units"][x[0]]
+            self.table.tab2.water.value[x[0]] = config_file["tab2"]["water"]["values"][x[0]]
+            self.table.tab2.water.unit[x[0]] = config_file["tab2"]["water"]["units"][x[0]]
+        self.table.update_parameters()
 
     def save_file(self):
         # Need data validation on values and units
         name = QFileDialog.getSaveFileName(self, 'Save File')
+        if not name[0]:
+            return
         config_file = ConfigObj(name[0])
-        config_file["values"] = {}
-        config_file["units"] = {}
+        config_file["systems"] = []
+        config_file["tab1"] = {}
+        config_file["tab1"]["values"] = {}
+        config_file["tab1"]["units"] = {}
+        config_file["tab2"] = {}
+        config_file["tab2"]["oil"] = {}
+        config_file["tab2"]["oil"]["values"] = {}
+        config_file["tab2"]["oil"]["units"] = {}
+        config_file["tab2"]["water"] = {}
+        config_file["tab2"]["water"]["values"] = {}
+        config_file["tab2"]["water"]["units"] = {}
+        for x in self.table.checked_units:
+            config_file["systems"].append(x)
         for x in self.parameter_list:
-            config_file["values"][x[0]] = self.value[x[0]]
-            config_file["units"][x[0]] = self.unit[x[0]]
+            config_file["tab1"]["values"][x[0]] = self.table.tab1.value[x[0]]
+            config_file["tab1"]["units"][x[0]] = self.table.tab1.unit[x[0]]
+        for x in self.fluids:
+            config_file["tab2"]["oil"]["values"][x[0]] = self.table.tab2.oil.value[x[0]]
+            config_file["tab2"]["oil"]["units"][x[0]] = self.table.tab2.oil.unit[x[0]]
+            config_file["tab2"]["water"]["values"][x[0]] = self.table.tab2.water.value[x[0]]
+            config_file["tab2"]["water"]["units"][x[0]] = self.table.tab2.water.unit[x[0]]
         config_file.write()

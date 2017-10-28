@@ -3,6 +3,7 @@ parameter_list = [["Area", "Area"], ["Altura", "Length"],
                   ["Pressao barometrica", "Pressure"],
                   ["Porosidade", "Dimensionless"],
                   ["Permeabilidade", "Dimensionless"]]
+fluids = [["Viscosidade", "Viscosity"], ["Densidade", "Density"]]
 units_systems = ["SI", "Imperial Units", "Field Units"]
 si_units = {"Area": ["meter ** 2"],
             "Density": ["kilogram / meter ** 3"],
