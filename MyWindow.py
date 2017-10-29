@@ -55,7 +55,7 @@ class MyWindow(QMainWindow):
         config_file = ConfigObj(name[0])
         self.table.checked_units.clear()
         for x in config_file["systems"]:
-            self.table.checked_units.add(x)
+            self.table.checked_units.add(int(x))
         for x in self.parameter_list:
             self.table.tab1.value[x[0]] = config_file["tab1"]["values"][x[0]]
             self.table.tab1.unit[x[0]] = config_file["tab1"]["units"][x[0]]
@@ -65,6 +65,7 @@ class MyWindow(QMainWindow):
             self.table.tab2.water.value[x[0]] = config_file["tab2"]["water"]["values"][x[0]]
             self.table.tab2.water.unit[x[0]] = config_file["tab2"]["water"]["units"][x[0]]
         self.table.update_parameters()
+        self.table.update_wells(config_file["tab4"])
 
     def save_file(self):
         # Need data validation on values and units
@@ -83,6 +84,9 @@ class MyWindow(QMainWindow):
         config_file["tab2"]["water"] = {}
         config_file["tab2"]["water"]["values"] = {}
         config_file["tab2"]["water"]["units"] = {}
+        config_file["tab4"] = {}
+        config_file["tab4"]["inpos"] = {}
+        config_file["tab4"]["outpos"] = {}
         for x in self.table.checked_units:
             config_file["systems"].append(x)
         for x in self.parameter_list:
@@ -93,4 +97,8 @@ class MyWindow(QMainWindow):
             config_file["tab2"]["oil"]["units"][x[0]] = self.table.tab2.oil.unit[x[0]]
             config_file["tab2"]["water"]["values"][x[0]] = self.table.tab2.water.value[x[0]]
             config_file["tab2"]["water"]["units"][x[0]] = self.table.tab2.water.unit[x[0]]
+        for x in self.table.tab4.inpos:
+            config_file["tab4"]["inpos"][x] = self.table.tab4.inpos[x]
+        for x in self.table.tab4.outpos:
+            config_file["tab4"]["outpos"][x] = self.table.tab4.outpos[x]
         config_file.write()
