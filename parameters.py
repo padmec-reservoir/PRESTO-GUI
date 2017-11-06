@@ -1,8 +1,9 @@
 parameter_list = [["Area", "Area"], ["Altura", "Length"],
                   ["Pressao inicial", "Pressure"],
-                  ["Pressao barometrica", "Pressure"],
-                  ["Porosidade", "Dimensionless"],
-                  ["Permeabilidade", "Dimensionless"]]
+                  ["Pressao barometrica", "Pressure"]]
+mesh = [["Porosidade", "Dimensionless"], ["Permeabilidade", "Permeability"],
+        ["Saturação Inicial", "Dimensionless"], ["X", "Length"],
+        ["Y", "Length"], ["Z", "Length"]]
 fluids = [["Viscosidade", "Viscosity"], ["Densidade", "Density"]]
 units_systems = ["SI", "Imperial Units", "Field Units"]
 si_units = {"Area": ["meter ** 2"],
@@ -16,6 +17,7 @@ si_units = {"Area": ["meter ** 2"],
             "Weigth per Length": ["kilogram / meter"],
             "Time": ["second", "minute", "hour", "day", "year"],
             "Viscosity": ["pascal * second"],
+            "Permeability": ["millidarcy"],
             "Dimensionless": [""]}
 imperial_units = {"Area": ["acre", "square_foot", "square_yard"],
                   "Density": ["pound / gallon", "pound / foot ** 3"],
@@ -28,6 +30,7 @@ imperial_units = {"Area": ["acre", "square_foot", "square_yard"],
                   "Mass per Length": ["pound / foot", "pound / inch"],
                   "Time": ["second", "minute", "hour", "day", "year"],
                   "Viscosity": ["centipoise"],
+                  "Permeability": ["millidarcy"],
                   "Dimensionless": [""]}
 field_units = {"Area": ["acre"],
                "Density": ["pound / barrel", "gram / centimeter ** 3"],
@@ -40,6 +43,7 @@ field_units = {"Area": ["acre"],
                "Mass per Length": ["pound / foot"],
                "Time": ["second", "minute", "hour", "day", "year"],
                "Viscosity": ["centipoise"],
+               "Permeability": ["millidarcy"],
                "Dimensionless": [""]}
 start_unit = {"Area": "",
               "Density": "",
@@ -52,4 +56,5 @@ start_unit = {"Area": "",
               "Mass per Length": "",
               "Time": "",
               "Viscosity": "",
+              "Permeability": "",
               "Dimensionless": ""}

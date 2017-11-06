@@ -9,10 +9,11 @@ from MyComboBox import MyComboBox
 
 
 class MyTableWidget(QTabWidget):
-    def __init__(self, parent, parameter_list, fluids):
+    def __init__(self, parent, parameter_list, fluids, mesh):
         super(MyTableWidget, self).__init__(parent)
         self.parameter_list = parameter_list
         self.fluids = fluids
+        self.mesh = mesh
         self.unit_list = [si_units, imperial_units, field_units]
         self.checked_units = set()
         self.parent = parent
@@ -21,12 +22,12 @@ class MyTableWidget(QTabWidget):
         self.tab2 = self.make_tab2(self)
         # self.tab3 = self.make_tab3(self)
         self.tab4 = self.make_tab4(self)
-        # self.tab5 = self.make_tab5(self)
+        self.tab5 = self.make_tab5(self)
         self.addTab(self.tab1, "Condições Iniciais")
         self.addTab(self.tab2, "Fluidos")
         # self.addTab(self.tab3, "Campo de Permeabilidade")
         self.addTab(self.tab4, "Poços")
-        # self.addTab(self.tab5, "Malha")
+        self.addTab(self.tab5, "Malha")
 
     def make_tab1(self, parent):
         tab1 = QWidget(parent)
@@ -107,6 +108,19 @@ class MyTableWidget(QTabWidget):
 
     def make_tab5(self, parent):
         tab5 = QWidget(parent)
+        tab5.value = dict((x[0], 0) for x in self.mesh)
+        tab5.unit = dict((x[0], "") for x in self.mesh)
+        tab5.layout = QGridLayout(tab5)
+        tab5.layout.setAlignment(Qt.AlignTop)
+        tab5.labels = self.make_labels(tab5, self.mesh)
+        tab5.inputs = self.make_inputs(tab5, self.mesh)
+        tab5.boxes = self.make_dropdowns(tab5, self.mesh)
+        i = 0
+        for x in self.mesh:
+            tab5.layout.addWidget(tab5.labels[x[0]], i, 1)
+            tab5.layout.addWidget(tab5.inputs[x[0]], i, 2)
+            tab5.layout.addWidget(tab5.boxes[x[0]], i, 3)
+            i = i + 1
         return tab5
 
     def make_inwell(self, posx = 0, posy = 0):
@@ -244,13 +258,22 @@ class MyTableWidget(QTabWidget):
                 water_cur = 0.0
             self.tab2.oil.value[x[0]] = oil_cur
             self.tab2.water.value[x[0]] = water_cur
+        for x in self.mesh:
+            try:
+                cur = float(self.tab5.inputs[x[0]].text())
+            except ValueError:
+                cur = 0.0
+            self.tab5.value[x[0]] = cur
 
     def get_unit(self, text):
         for x in self.parameter_list:
             self.tab1.unit[x[0]] = self.tab1.boxes[x[0]].currentText()
         for x in self.fluids:
-            self.tab2.oil.unit[x[0]] = self.tab2.oil.boxes[x[0]].currentText()
-            self.tab2.water.unit[x[0]] = self.tab2.water.boxes[x[0]].currentText()
+            i = x[0]
+            self.tab2.oil.unit[i] = self.tab2.oil.boxes[i].currentText()
+            self.tab2.water.unit[i] = self.tab2.water.boxes[i].currentText()
+        for x in self.mesh:
+            self.tab5.unit[x[0]] = self.tab5.boxes[x[0]].currentText()
 
     def update_wells(self, info):
         while self.tab4.inwells_c > 0:
@@ -270,12 +293,15 @@ class MyTableWidget(QTabWidget):
         old_tab1 = {}
         old_tab2_oil = {}
         old_tab2_water = {}
+        old_tab5 = {}
         for x in self.tab1.boxes:
             old_tab1[x] = self.tab1.boxes[x].blockSignals(True)
         for x in self.tab2.oil.boxes:
             old_tab2_oil[x] = self.tab2.oil.boxes[x].blockSignals(True)
         for x in self.tab2.water.boxes:
             old_tab2_water[x] = self.tab2.water.boxes[x].blockSignals(True)
+        for x in self.tab5.boxes:
+            old_tab5[x] = self.tab5.boxes[x].blockSignals(True)
         for x in self.checked_units:
             self.tab1.tree.units.child(int(x)).setCheckState(0, Qt.Checked)
         self.update_units(None, None)
@@ -287,12 +313,17 @@ class MyTableWidget(QTabWidget):
             self.tab2.oil.boxes[x[0]].setCurrentText(self.tab2.oil.unit[x[0]])
             self.tab2.water.inputs[x[0]].setText(self.tab2.water.value[x[0]])
             self.tab2.water.boxes[x[0]].setCurrentText(self.tab2.water.unit[x[0]])
+        for x in self.mesh:
+            self.tab5.inputs[x[0]].setText(self.tab5.value[x[0]])
+            self.tab5.boxes[x[0]].setCurrentText(self.tab5.unit[x[0]])
         for x in self.tab1.boxes:
             self.tab1.boxes[x].blockSignals(old_tab1[x])
         for x in self.tab2.oil.boxes:
             self.tab2.oil.boxes[x].blockSignals(old_tab2_oil[x])
         for x in self.tab2.water.boxes:
             self.tab2.water.boxes[x].blockSignals(old_tab2_water[x])
+        for x in self.tab5.boxes:
+            self.tab5.boxes[x].blockSignals(old_tab5[x])
 
     def update_units(self, item, col):
         count = self.tab1.tree.units.childCount()
@@ -342,3 +373,20 @@ class MyTableWidget(QTabWidget):
                 self.tab2.oil.boxes[p[0]].addItem("-- Choose Unit")
             if self.tab2.water.boxes[p[0]].count() == 0:
                 self.tab2.water.boxes[p[0]].addItem("-- Choose Unit")
+        for p in self.mesh:
+            final_units[p[1]] = set()
+            for x in self.checked_units:
+                for k in self.unit_list[x][p[1]]:
+                    final_units[p[1]].add(k)
+        for p in self.mesh:
+            cur_units = [self.tab5.boxes[p[0]].itemText(i)
+                         for i in range(self.tab5.boxes[p[0]].count())]
+            for k in cur_units:
+                if k not in final_units[p[1]]:
+                    i = self.tab5.boxes[p[0]].findText(k)
+                    self.tab5.boxes[p[0]].removeItem(i)
+            for k in final_units[p[1]]:
+                if self.tab5.boxes[p[0]].findText(k) == -1:
+                    self.tab5.boxes[p[0]].addItem(k)
+            if self.tab5.boxes[p[0]].count() == 0:
+                self.tab5.boxes[p[0]].addItem("-- Choose Unit")
