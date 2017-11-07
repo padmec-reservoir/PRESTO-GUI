@@ -85,13 +85,11 @@ class MyTableWidget(QTabWidget):
     def make_tab4(self, parent):
         tab4 = QWidget(parent)
         tab4.inpos = {}
+        tab4.inwells = {}
         tab4.outpos = {}
+        tab4.outwells = {}
         tab4.layout = QGridLayout(tab4)
         tab4.layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-        tab4.inwells = {}
-        tab4.inwells_c = 0
-        tab4.outwells = {}
-        tab4.outwells_c = 0
         tab4.add_inwell_but = QPushButton("Novo Poço Injetor", tab4)
         tab4.add_inwell_but.clicked.connect(self.make_inwell)
         tab4.del_inwell_but = QPushButton("Deletar Poço Injetor", tab4)
@@ -123,11 +121,10 @@ class MyTableWidget(QTabWidget):
             i = i + 1
         return tab5
 
-    def make_inwell(self, posx = 0, posy = 0):
+    def make_inwell(self, posx = 0, posy = 0, time = 0, unit = ""):
         well = QWidget(self.tab4)
         well.layout = QHBoxLayout(well)
-        self.tab4.inwells_c = self.tab4.inwells_c + 1
-        well.name = "Poco injetor "+str(self.tab4.inwells_c)
+        well.name = "Poco injetor "+str(len(self.tab4.inwells) + 1)
         well.label = QLabel(well.name, well)
         well.xlabel = QLabel("X: ", well)
         well.xin = QLineEdit(well)
@@ -135,21 +132,28 @@ class MyTableWidget(QTabWidget):
         well.ylabel = QLabel("Y: ", well)
         well.yin = QLineEdit(well)
         well.yin.textEdited.connect(self.get_well_pos)
+        well.timelabel = QLabel("Time: ", well)
+        well.timein = QLineEdit(well)
+        well.timein.textEdited.connect(self.get_well_pos)
+        well.timebox = MyComboBox(well, start_unit, "Time")
         well.layout.addWidget(well.label)
         well.layout.addWidget(well.xlabel)
         well.layout.addWidget(well.xin)
         well.layout.addWidget(well.ylabel)
         well.layout.addWidget(well.yin)
+        well.layout.addWidget(well.timelabel)
+        well.layout.addWidget(well.timein)
+        well.layout.addWidget(well.timebox)
         self.tab4.inwells[well.name] = well
-        self.tab4.inpos[well.name] = (posx, posy)
-        i = self.tab4.inwells_c + 1
-        self.tab4.layout.addWidget(well, i, 1, i, 2, Qt.AlignLeft)
+        self.tab4.inpos[well.name] = (posx, posy, time, unit)
+        i = len(self.tab4.inwells) + len(self.tab4.outwells) + 1
+        self.tab4.layout.addWidget(well, i, 1, i, 4, Qt.AlignLeft)
+        self.update_units(0, 0)
 
-    def make_outwell(self, posx = 0, posy = 0):
+    def make_outwell(self, posx = 0, posy = 0, time = 0, unit = ""):
         well = QWidget(self.tab4)
         well.layout = QHBoxLayout(well)
-        self.tab4.outwells_c = self.tab4.outwells_c + 1
-        well.name = "Poco extrator "+str(self.tab4.outwells_c)
+        well.name = "Poco extrator "+str(len(self.tab4.outwells) + 1)
         well.label = QLabel(well.name, well)
         well.xlabel = QLabel("X: ", well)
         well.xin = QLineEdit(well)
@@ -157,31 +161,37 @@ class MyTableWidget(QTabWidget):
         well.ylabel = QLabel("Y: ", well)
         well.yin = QLineEdit(well)
         well.yin.textEdited.connect(self.get_well_pos)
+        well.timelabel = QLabel("Time: ", well)
+        well.timein = QLineEdit(well)
+        well.timein.textEdited.connect(self.get_well_pos)
+        well.timebox = MyComboBox(well, start_unit, "Time")
         well.layout.addWidget(well.label)
         well.layout.addWidget(well.xlabel)
         well.layout.addWidget(well.xin)
         well.layout.addWidget(well.ylabel)
         well.layout.addWidget(well.yin)
+        well.layout.addWidget(well.timelabel)
+        well.layout.addWidget(well.timein)
+        well.layout.addWidget(well.timebox)
         self.tab4.outwells[well.name] = well
-        self.tab4.outpos[well.name] = (posx, posy)
-        i = self.tab4.outwells_c + 1
-        self.tab4.layout.addWidget(well, i, 3, i, 4, Qt.AlignRight)
+        self.tab4.outpos[well.name] = (posx, posy, time, unit)
+        i = len(self.tab4.inwells) + len(self.tab4.outwells) + 1
+        self.tab4.layout.addWidget(well, i, 1, i, 4, Qt.AlignRight)
+        self.update_units(0, 0)
 
     def delete_inwell(self, a = None):
-        if self.tab4.inwells_c == 0:
+        if len(self.tab4.inwells) == 0:
             return
-        deleted = "Poco injetor "+str(self.tab4.inwells_c)
-        self.tab4.inwells_c = self.tab4.inwells_c - 1
+        deleted = "Poco injetor "+str(len(self.tab4.inwells))
         del self.tab4.inpos[deleted]
         well = self.tab4.inwells.pop(deleted)
         self.tab4.layout.removeWidget(well)
         well.setParent(None)
 
     def delete_outwell(self, a = None):
-        if self.tab4.outwells_c == 0:
+        if len(self.tab4.outwells) == 0:
             return
-        deleted = "Poco extrator "+str(self.tab4.outwells_c)
-        self.tab4.outwells_c = self.tab4.outwells_c - 1
+        deleted = "Poco extrator "+str(len(self.tab4.outwells))
         del self.tab4.outpos[deleted]
         well = self.tab4.outwells.pop(deleted)
         self.tab4.layout.removeWidget(well)
@@ -190,24 +200,34 @@ class MyTableWidget(QTabWidget):
     def get_well_pos(self, text):
         for x in self.tab4.inwells.values():
             try:
-                a = float(x.xin.text())
+                posx = float(x.xin.text())
             except ValueError:
-                a = 0.0
+                posx = 0.0
             try:
-                b = float(x.yin.text())
+                posy = float(x.yin.text())
             except ValueError:
-                b = 0.0
-            self.tab4.inpos[x.name] = (a, b)
+                posy = 0.0
+            try:
+                time = float(x.timein.text())
+            except:
+                time = 0.0
+            unit = x.timebox.currentText()
+            self.tab4.inpos[x.name] = (posx, posy, time, unit)
         for x in self.tab4.outwells.values():
             try:
-                a = float(x.xin.text())
+                posx = float(x.xin.text())
             except ValueError:
-                a = 0.0
+                posx = 0.0
             try:
-                b = float(x.yin.text())
+                posy = float(x.yin.text())
             except ValueError:
-                b = 0.0
-            self.tab4.outpos[x.name] = (a, b)
+                posy = 0.0
+            try:
+                time = float(x.timein.text())
+            except:
+                time = 0.0
+            unit = x.timebox.currentText()
+            self.tab4.outpos[x.name] = (posx, posy, time, unit)
 
     def make_labels(self, parent, label_list):
         labels = {}
@@ -276,23 +296,36 @@ class MyTableWidget(QTabWidget):
             self.tab5.unit[x[0]] = self.tab5.boxes[x[0]].currentText()
 
     def update_wells(self, info):
-        while self.tab4.inwells_c > 0:
+        while len(self.tab4.inwells) > 0:
             self.delete_inwell()
-        while self.tab4.outwells_c > 0:
+        while len(self.tab4.outwells) > 0:
             self.delete_outwell()
         for x in info["inpos"]:
-            self.make_inwell(info["inpos"][x][0], info["inpos"][x][1])
-            self.tab4.inwells[x].xin.setText(str(info["inpos"][x][0]))
-            self.tab4.inwells[x].yin.setText(str(info["inpos"][x][1]))
+            posx = info["inpos"][x][0]
+            posy = info["inpos"][x][1]
+            time = info["inpos"][x][2]
+            unit = info["inpos"][x][3]
+            self.make_inwell(posx, posy, time, unit)
+            self.tab4.inwells[x].xin.setText(str(posx))
+            self.tab4.inwells[x].yin.setText(str(posy))
+            self.tab4.inwells[x].timein.setText(str(time))
         for x in info["outpos"]:
-            self.make_outwell(info["outpos"][x][0], info["outpos"][x][1])
-            self.tab4.outwells[x].xin.setText(str(info["outpos"][x][0]))
-            self.tab4.outwells[x].yin.setText(str(info["outpos"][x][1]))
+            posx = info["outpos"][x][0]
+            posy = info["outpos"][x][1]
+            time = info["outpos"][x][2]
+            unit = info["outpos"][x][3]
+            self.make_outwell(posx, posy, time, unit)
+            self.tab4.outwells[x].xin.setText(str(posx))
+            self.tab4.outwells[x].yin.setText(str(posy))
+            self.tab4.outwells[x].timein.setText(str(time))
+        self.update_parameters()
 
     def update_parameters(self):
         old_tab1 = {}
         old_tab2_oil = {}
         old_tab2_water = {}
+        old_tab4_in = {}
+        old_tab4_out = {}
         old_tab5 = {}
         for x in self.tab1.boxes:
             old_tab1[x] = self.tab1.boxes[x].blockSignals(True)
@@ -300,6 +333,10 @@ class MyTableWidget(QTabWidget):
             old_tab2_oil[x] = self.tab2.oil.boxes[x].blockSignals(True)
         for x in self.tab2.water.boxes:
             old_tab2_water[x] = self.tab2.water.boxes[x].blockSignals(True)
+        for x in self.tab4.inwells:
+            old_tab4_in[x] = self.tab4.inwells[x].timebox.blockSignals(True)
+        for x in self.tab4.outwells:
+            old_tab4_out[x] = self.tab4.outwells[x].timebox.blockSignals(True)
         for x in self.tab5.boxes:
             old_tab5[x] = self.tab5.boxes[x].blockSignals(True)
         for x in self.checked_units:
@@ -313,6 +350,10 @@ class MyTableWidget(QTabWidget):
             self.tab2.oil.boxes[x[0]].setCurrentText(self.tab2.oil.unit[x[0]])
             self.tab2.water.inputs[x[0]].setText(self.tab2.water.value[x[0]])
             self.tab2.water.boxes[x[0]].setCurrentText(self.tab2.water.unit[x[0]])
+        for x in self.tab4.inwells.values():
+            x.timebox.setCurrentText(self.tab4.inpos[x.name][3])
+        for x in self.tab4.outwells.values():
+            x.timebox.setCurrentText(self.tab4.outpos[x.name][3])
         for x in self.mesh:
             self.tab5.inputs[x[0]].setText(self.tab5.value[x[0]])
             self.tab5.boxes[x[0]].setCurrentText(self.tab5.unit[x[0]])
@@ -322,6 +363,10 @@ class MyTableWidget(QTabWidget):
             self.tab2.oil.boxes[x].blockSignals(old_tab2_oil[x])
         for x in self.tab2.water.boxes:
             self.tab2.water.boxes[x].blockSignals(old_tab2_water[x])
+        for x in self.tab4.inwells:
+            self.tab4.inwells[x].timebox.blockSignals(old_tab4_in[x])
+        for x in self.tab4.outwells:
+            self.tab4.outwells[x].timebox.blockSignals(old_tab4_out[x])
         for x in self.tab5.boxes:
             self.tab5.boxes[x].blockSignals(old_tab5[x])
 
@@ -373,6 +418,34 @@ class MyTableWidget(QTabWidget):
                 self.tab2.oil.boxes[p[0]].addItem("-- Choose Unit")
             if self.tab2.water.boxes[p[0]].count() == 0:
                 self.tab2.water.boxes[p[0]].addItem("-- Choose Unit")
+        final_units["Time"] = set()
+        for x in self.checked_units:
+            for k in self.unit_list[x]["Time"]:
+                final_units["Time"].add(k)
+        for x in self.tab4.inwells.values():
+            cur_units = [x.timebox.itemText(i)
+                         for i in range(x.timebox.count())]
+            for k in cur_units:
+                if k not in final_units["Time"]:
+                    i = x.timebox.findText(k)
+                    x.timebox.removeItem(i)
+            for k in final_units["Time"]:
+                if x.timebox.findText(k) == -1:
+                    x.timebox.addItem(k)
+            if x.timebox.count() == 0:
+                x.timebox.addItem("-- Choose Unit")
+        for x in self.tab4.outwells.values():
+            cur_units = [x.timebox.itemText(i)
+                         for i in range(x.timebox.count())]
+            for k in cur_units:
+                if k not in final_units["Time"]:
+                    i = x.timebox.findText(k)
+                    x.timebox.removeItem(i)
+            for k in final_units["Time"]:
+                if x.timebox.findText(k) == -1:
+                    x.timebox.addItem(k)
+            if x.timebox.count() == 0:
+                x.timebox.addItem("-- Choose Unit")
         for p in self.mesh:
             final_units[p[1]] = set()
             for x in self.checked_units:
