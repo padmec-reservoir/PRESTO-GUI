@@ -2,7 +2,7 @@ parameter_list = [["Area", "Area"], ["Altura", "Length"],
                   ["Pressao inicial", "Pressure"],
                   ["Pressao barometrica", "Pressure"]]
 mesh = [["Porosidade", "Dimensionless"], ["Permeabilidade", "Permeability"],
-        ["Saturação Inicial", "Dimensionless"], ["X", "Length"],
+        ["Saturacao Inicial", "Dimensionless"], ["X", "Length"],
         ["Y", "Length"], ["Z", "Length"]]
 fluids = [["Viscosidade", "Viscosity"], ["Densidade", "Density"]]
 units_systems = ["SI", "Imperial Units", "Field Units"]

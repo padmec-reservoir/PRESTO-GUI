@@ -265,10 +265,10 @@ class MyTableWidget(QTabWidget):
     def get_value(self, text):
         for x in self.parameter_list:
             try:
-                cur = float(self.tab1.inputs[x[0]].text())
+                tab1_cur = float(self.tab1.inputs[x[0]].text())
             except ValueError:
-                cur = 0.0
-            self.tab1.value[x[0]] = cur
+                tab1_cur = 0.0
+            self.tab1.value[x[0]] = tab1_cur
         for x in self.fluids:
             try:
                 oil_cur = float(self.tab2.oil.inputs[x[0]].text())
@@ -280,10 +280,10 @@ class MyTableWidget(QTabWidget):
             self.tab2.water.value[x[0]] = water_cur
         for x in self.mesh:
             try:
-                cur = float(self.tab5.inputs[x[0]].text())
+                tab5_cur = float(self.tab5.inputs[x[0]].text())
             except ValueError:
-                cur = 0.0
-            self.tab5.value[x[0]] = cur
+                tab5_cur = 0.0
+            self.tab5.value[x[0]] = tab5_cur
 
     def get_unit(self, text):
         for x in self.parameter_list:
