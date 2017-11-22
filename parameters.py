@@ -1,3 +1,5 @@
+fields = ["Condições Iniciais", "Fluidos", "Campo de Permeabilidade", "Poços",
+          "Malha"]
 parameter_list = [["Area", "Area"], ["Altura", "Length"],
                   ["Pressao inicial", "Pressure"],
                   ["Pressao barometrica", "Pressure"]]
