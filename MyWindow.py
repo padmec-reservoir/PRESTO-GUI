@@ -16,7 +16,7 @@ from parameters import (si_units, imperial_units, field_units, units_systems,
 class MyWindow(QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
-        self.setGeometry(50, 50, 700, 500)
+        self.setGeometry(50, 50, 1000, 500)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QIcon('presto-logo2.png'))
         self.ureg = pint.UnitRegistry()
@@ -306,10 +306,6 @@ class MyWindow(QMainWindow):
         for x in range(self.tree.fields.childCount()):
             if self.tree.fields.child(x).text(0) == "Poços":
                 for y in range(self.tree.fields.child(x).childCount()):
-                    try:
-                        print(self.tree.fields.child(x).child(y).text(0))
-                    except AttributeError:
-                        print("wtf")
                     if self.tree.fields.child(x).child(y).text(0) == deleted:
                         line = self.tree.fields.child(x).takeChild(y)
                         return
