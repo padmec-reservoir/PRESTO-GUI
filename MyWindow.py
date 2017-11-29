@@ -10,7 +10,8 @@ from PyQt5.QtCore import Qt
 from MyAction import MyAction
 from MyComboBox import MyComboBox
 from parameters import (si_units, imperial_units, field_units, units_systems,
-                        start_unit, parameter_list, fluids, mesh, fields)
+                        start_unit, parameter_list, fluids, mesh, fields,
+                        permcamp)
 
 
 class MyWindow(QMainWindow):
@@ -85,6 +86,8 @@ class MyWindow(QMainWindow):
             self.tab2.oil.unit[x[0]] = config_file["tab2"]["oil"]["units"][x[0]]
             self.tab2.water.value[x[0]] = config_file["tab2"]["water"]["values"][x[0]]
             self.tab2.water.unit[x[0]] = config_file["tab2"]["water"]["units"][x[0]]
+        for x in config_file["tab3"]:
+            self.tab3.value[x] = config_file["tab3"][x]
         for x in mesh:
             self.tab5.value[x[0]] = config_file["tab5"]["values"][x[0]]
             self.tab5.unit[x[0]] = config_file["tab5"]["units"][x[0]]
@@ -108,6 +111,7 @@ class MyWindow(QMainWindow):
         config_file["tab2"]["water"] = {}
         config_file["tab2"]["water"]["values"] = {}
         config_file["tab2"]["water"]["units"] = {}
+        config_file["tab3"] = {}
         config_file["tab4"] = {}
         config_file["tab4"]["inpos"] = {}
         config_file["tab4"]["outpos"] = {}
@@ -124,6 +128,8 @@ class MyWindow(QMainWindow):
             config_file["tab2"]["oil"]["units"][x[0]] = self.tab2.oil.unit[x[0]]
             config_file["tab2"]["water"]["values"][x[0]] = self.tab2.water.value[x[0]]
             config_file["tab2"]["water"]["units"][x[0]] = self.tab2.water.unit[x[0]]
+        for k in self.tab3.value:
+            config_file["tab3"][k] = self.tab3.value[k]
         for x in self.tab4.inpos:
             config_file["tab4"]["inpos"][x] = self.tab4.inpos[x]
         for x in self.tab4.outpos:
@@ -142,7 +148,7 @@ class MyWindow(QMainWindow):
         tab1.layout.addWidget(self.tree, 1, 1, 6, 1)
         tab1.labels = self.make_labels(tab1, parameter_list)
         tab1.inputs = self.make_inputs(tab1, parameter_list)
-        tab1.boxes = self.make_dropdowns(tab1, parameter_list)
+        tab1.boxes = self.make_dropdowns(tab1, parameter_list, self.get_unit)
         i = 0
         j = 2
         for x in parameter_list:
@@ -156,18 +162,18 @@ class MyWindow(QMainWindow):
         tab2 = QWidget(parent)
         tab2.layout = QGridLayout(tab2)
         tab2.layout.setAlignment(Qt.AlignTop)
-        tab2.oil = QLabel("Óleo", tab2)
+        tab2.oil = QLabel("Oil", tab2)
         tab2.oil.value = dict((x[0], 0) for x in fluids)
         tab2.oil.unit = dict((x[0], "") for x in fluids)
         tab2.oil.labels = self.make_labels(tab2, fluids)
         tab2.oil.inputs = self.make_inputs(tab2, fluids)
-        tab2.oil.boxes = self.make_dropdowns(tab2, fluids)
-        tab2.water = QLabel("Água", tab2)
+        tab2.oil.boxes = self.make_dropdowns(tab2, fluids, self.get_unit)
+        tab2.water = QLabel("Water", tab2)
         tab2.water.value = dict((x[0], 0) for x in fluids)
         tab2.water.unit = dict((x[0], "") for x in fluids)
         tab2.water.labels = self.make_labels(tab2, fluids)
         tab2.water.inputs = self.make_inputs(tab2, fluids)
-        tab2.water.boxes = self.make_dropdowns(tab2, fluids)
+        tab2.water.boxes = self.make_dropdowns(tab2, fluids, self.get_unit)
         tab2.layout.addWidget(tab2.oil, 1, 1)
         tab2.layout.addWidget(tab2.water, 1, 4)
         i = 2
@@ -183,6 +189,32 @@ class MyWindow(QMainWindow):
 
     def make_tab3(self, parent):
         tab3 = QWidget(parent)
+        tab3.layout = QGridLayout(tab3)
+        tab3.layout.setAlignment(Qt.AlignTop)
+        tab3.value = {}
+        tab3.coords = ["X", "Y", "Z"]
+        tab3.labels = {}
+        tab3.inputs = {}
+        tab3.boxes = self.make_dropdowns(tab3, permcamp, self.save_camp)
+        i = 1
+        for x in tab3.coords:
+            tab3.labels[x] = QLabel(x, tab3)
+            tab3.inputs[x] = QLineEdit(tab3)
+            tab3.inputs[x].textEdited.connect(self.save_camp)
+            tab3.boxes[x] = MyComboBox(tab3, start_unit, "Length")
+            tab3.boxes[x].currentTextChanged.connect(self.save_camp)
+            tab3.layout.addWidget(tab3.labels[x], i, 1)
+            tab3.layout.addWidget(tab3.inputs[x], i, 2)
+            tab3.layout.addWidget(tab3.boxes[x], i, 3)
+            i += 1
+        for x in permcamp:
+            tab3.labels[x[0]] = QLabel(x[0], tab3)
+            tab3.inputs[x[0]] = QLineEdit(tab3)
+            tab3.inputs[x[0]].textEdited.connect(self.save_camp)
+            tab3.layout.addWidget(tab3.labels[x[0]], i, 1)
+            tab3.layout.addWidget(tab3.inputs[x[0]], i, 2)
+            tab3.layout.addWidget(tab3.boxes[x[0]], i, 3)
+            i += 1
         return tab3
 
     def make_tab4(self, parent):
@@ -196,9 +228,9 @@ class MyWindow(QMainWindow):
         tab4.layout = QGridLayout(tab4)
         tab4.layout.setVerticalSpacing(20)
         tab4.layout.setAlignment(Qt.AlignTop | Qt.AlignCenter)
-        tab4.add_inwell_but = QPushButton("Novo Poço Injetor", tab4)
+        tab4.add_inwell_but = QPushButton("New Injection Well", tab4)
         tab4.add_inwell_but.clicked.connect(self.make_inwell)
-        tab4.add_outwell_but = QPushButton("Novo Poço Ejetor", tab4)
+        tab4.add_outwell_but = QPushButton("New Producer Well", tab4)
         tab4.add_outwell_but.clicked.connect(self.make_outwell)
         tab4.layout.addWidget(tab4.add_inwell_but, 1, 1)
         tab4.layout.addWidget(tab4.add_outwell_but, 2, 1)
@@ -212,7 +244,7 @@ class MyWindow(QMainWindow):
         tab5.layout.setAlignment(Qt.AlignTop)
         tab5.labels = self.make_labels(tab5, mesh)
         tab5.inputs = self.make_inputs(tab5, mesh)
-        tab5.boxes = self.make_dropdowns(tab5, mesh)
+        tab5.boxes = self.make_dropdowns(tab5, mesh, self.get_unit)
         i = 0
         for x in mesh:
             tab5.layout.addWidget(tab5.labels[x[0]], i, 1)
@@ -221,13 +253,33 @@ class MyWindow(QMainWindow):
             i = i + 1
         return tab5
 
-    def make_inwell(self, posx = 0, posy = 0, time = 0, unit = ""):
+    def save_camp(self, text):
+        try:
+            x = float(self.tab3.inputs["X"].text())
+            y = float(self.tab3.inputs["Y"].text())
+            z = float(self.tab3.inputs["Z"].text())
+        except ValueError:
+            return
+        key = str((x, y, z))
+        self.tab3.value[key] = {}
+        for k in permcamp:
+            try:
+                v = float(self.tab3.inputs[k[0]].text())
+            except ValueError:
+                v = 0.0
+            u = self.tab3.boxes[k[0]].currentText()
+            self.tab3.value[key][k[0]] = (v, u)
+
+    def make_inwell(self, posx = 0, posy = 0, time = 0, unit = "", name = None):
         well = QWidget(self.tab4)
         well.layout = QFormLayout(well)
-        well.name = "Poco injetor "+str(self.tab4.in_c)
+        if name == None:
+            well.name = "Injection Well "+str(self.tab4.in_c)
+        else:
+            well.name = name
         self.tab4.in_c += 1
         well.label = QLabel(well.name, well)
-        well.delete = QPushButton("Remover poço", well)
+        well.delete = QPushButton("Remove Well", well)
         well.delete.clicked.connect(self.delete_well)
         well.xlabel = QLabel("X: ", well)
         well.xin = QLineEdit(well)
@@ -247,22 +299,23 @@ class MyWindow(QMainWindow):
         well.layout.addRow(well.xlabel, well.xin)
         well.layout.addRow(well.ylabel, well.yin)
         well.layout.addRow(well.timelabel, well.wrap)
-
         for x in range(self.tree.fields.childCount()):
-            if self.tree.fields.child(x).text(0) == "Poços":
+            if self.tree.fields.child(x).text(0) == "Wells":
                 well.entry = QTreeWidgetItem(self.tree.fields.child(x), [well.name])
-
         self.tab4.inwells[well.name] = well
         self.tab4.inpos[well.name] = (posx, posy, time, unit)
         self.update_units(0, -1)
 
-    def make_outwell(self, posx = 0, posy = 0, time = 0, unit = ""):
+    def make_outwell(self, posx = 0, posy = 0, time = 0, unit = "", name = None):
         well = QWidget(self.tab4)
         well.layout = QFormLayout(well)
-        well.name = "Poco ejetor "+str(self.tab4.out_c)
+        if name == None:
+            well.name = "Producer Well "+str(self.tab4.out_c)
+        else:
+            well.name = name
         self.tab4.out_c += 1
         well.label = QLabel(well.name, well)
-        well.delete = QPushButton("Remover poço", well)
+        well.delete = QPushButton("Remove Well", well)
         well.delete.clicked.connect(self.delete_well)
         well.xlabel = QLabel("X: ", well)
         well.xin = QLineEdit(well)
@@ -282,11 +335,9 @@ class MyWindow(QMainWindow):
         well.layout.addRow(well.xlabel, well.xin)
         well.layout.addRow(well.ylabel, well.yin)
         well.layout.addRow(well.timelabel, well.wrap)
-
         for x in range(self.tree.fields.childCount()):
-            if self.tree.fields.child(x).text(0) == "Poços":
+            if self.tree.fields.child(x).text(0) == "Wells":
                 well.entry = QTreeWidgetItem(self.tree.fields.child(x), [well.name])
-
         self.tab4.outwells[well.name] = well
         self.tab4.outpos[well.name] = (posx, posy, time, unit)
         self.update_units(0, -1)
@@ -322,7 +373,7 @@ class MyWindow(QMainWindow):
                 posy = 0.0
             try:
                 time = float(x.timein.text())
-            except:
+            except ValueError:
                 time = 0.0
             unit = x.timebox.currentText()
             self.tab4.inpos[x.name] = (posx, posy, time, unit)
@@ -337,7 +388,7 @@ class MyWindow(QMainWindow):
                 posy = 0.0
             try:
                 time = float(x.timein.text())
-            except:
+            except ValueError:
                 time = 0.0
             unit = x.timebox.currentText()
             self.tab4.outpos[x.name] = (posx, posy, time, unit)
@@ -355,11 +406,11 @@ class MyWindow(QMainWindow):
             inputs[x[0]].textEdited.connect(self.get_value)
         return inputs
 
-    def make_dropdowns(self, parent, dropdown_list):
+    def make_dropdowns(self, parent, dropdown_list, func):
         boxes = {}
         for x in dropdown_list:
             boxes[x[0]] = MyComboBox(parent, start_unit, x[1])
-            boxes[x[0]].currentTextChanged.connect(self.get_unit)
+            boxes[x[0]].currentTextChanged.connect(func)
         return boxes
 
     def make_tree(self, parent):
@@ -425,7 +476,7 @@ class MyWindow(QMainWindow):
             posy = info["inpos"][x][1]
             time = info["inpos"][x][2]
             unit = info["inpos"][x][3]
-            self.make_inwell(posx, posy, time, unit)
+            self.make_inwell(posx, posy, time, unit, x)
             self.tab4.inwells[x].xin.setText(str(posx))
             self.tab4.inwells[x].yin.setText(str(posy))
             self.tab4.inwells[x].timein.setText(str(time))
@@ -434,7 +485,7 @@ class MyWindow(QMainWindow):
             posy = info["outpos"][x][1]
             time = info["outpos"][x][2]
             unit = info["outpos"][x][3]
-            self.make_outwell(posx, posy, time, unit)
+            self.make_outwell(posx, posy, time, unit, x)
             self.tab4.outwells[x].xin.setText(str(posx))
             self.tab4.outwells[x].yin.setText(str(posy))
             self.tab4.outwells[x].timein.setText(str(time))
@@ -546,6 +597,40 @@ class MyWindow(QMainWindow):
                     self.tab2.oil.boxes[p[0]].addItem("-- Choose Unit")
                 if self.tab2.water.boxes[p[0]].count() == 0:
                     self.tab2.water.boxes[p[0]].addItem("-- Choose Unit")
+            for p in self.tab3.coords:
+                final_units["Length"] = set()
+                for x in self.checked_units:
+                    for k in self.unit_list[x]["Length"]:
+                        final_units["Length"].add(k)
+            for p in self.tab3.coords:
+                cur_units = [self.tab3.boxes[p[0]].itemText(i)
+                             for i in range(self.tab3.boxes[p[0]].count())]
+                for k in cur_units:
+                    if k not in final_units["Length"]:
+                        i = self.tab3.boxes[p[0]].findText(k)
+                        self.tab3.boxes[p[0]].removeItem(i)
+                for k in final_units["Length"]:
+                    if self.tab3.boxes[p[0]].findText(k) == -1:
+                        self.tab3.boxes[p[0]].addItem(k)
+                if self.tab3.boxes[p[0]].count() == 0:
+                    self.tab3.boxes[p[0]].addItem("-- Choose Unit")
+            for p in permcamp:
+                final_units[p[1]] = set()
+                for x in self.checked_units:
+                    for k in self.unit_list[x][p[1]]:
+                        final_units[p[1]].add(k)
+            for p in permcamp:
+                cur_units = [self.tab3.boxes[p[0]].itemText(i)
+                             for i in range(self.tab3.boxes[p[0]].count())]
+                for k in cur_units:
+                    if k not in final_units[p[1]]:
+                        i = self.tab3.boxes[p[0]].findText(k)
+                        self.tab3.boxes[p[0]].removeItem(i)
+                for k in final_units[p[1]]:
+                    if self.tab3.boxes[p[0]].findText(k) == -1:
+                        self.tab3.boxes[p[0]].addItem(k)
+                if self.tab3.boxes[p[0]].count() == 0:
+                    self.tab3.boxes[p[0]].addItem("-- Choose Unit")
             final_units["Time"] = set()
             for x in self.checked_units:
                 for k in self.unit_list[x]["Time"]:

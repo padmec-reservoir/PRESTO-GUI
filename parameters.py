@@ -1,12 +1,11 @@
-fields = ["Condições Iniciais", "Fluidos", "Campo de Permeabilidade", "Poços",
-          "Malha"]
-parameter_list = [["Area", "Area"], ["Altura", "Length"],
-                  ["Pressao inicial", "Pressure"],
-                  ["Pressao barometrica", "Pressure"]]
-mesh = [["Porosidade", "Dimensionless"], ["Permeabilidade", "Permeability"],
-        ["Saturacao Inicial", "Dimensionless"], ["X", "Length"],
+fields = ["Initial Conditions", "Fluids", "Permeability Camp", "Wells", "Mesh"]
+parameter_list = [["Area", "Area"], ["Height", "Length"],
+                  ["Initial Pressure", "Pressure"],
+                  ["Barometric Pressure", "Pressure"]]
+mesh = [["Initial Saturation", "Dimensionless"], ["X", "Length"],
         ["Y", "Length"], ["Z", "Length"]]
-fluids = [["Viscosidade", "Viscosity"], ["Densidade", "Density"]]
+permcamp = [["Porosity", "Dimensionless"], ["Permeability", "Permeability"]]
+fluids = [["Viscosity", "Viscosity"], ["Density", "Density"]]
 units_systems = ["SI", "Imperial Units", "Field Units"]
 si_units = {"Area": ["meter ** 2"],
             "Density": ["kilogram / meter ** 3"],
