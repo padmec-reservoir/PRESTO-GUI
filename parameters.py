@@ -59,3 +59,17 @@ start_unit = {"Area": "",
               "Viscosity": "",
               "Permeability": "",
               "Dimensionless": ""}
+roots = ["Problem", "Physical/Mathematical Model", "Geometry",
+         "Wells (Geometry)", "Physical Properties", "Analisys Interval",
+         "Initial Conditions", "Boundary Conditions", "Numerical Methods",
+         "Output Configuration"]
+leafs = {"Problem": ["Dimensionality"],
+         "Physical/Mathematical Model": ["Reservoir"],
+         "Geometry": ["Mesh"],
+         "Wells (Geometry)": [],
+         "Physical Properties": ["Rock (K, Φ)", "Fluid", "Rock (Flux, ρ, k)"],
+         "Analisys Interval": [] ,
+         "Initial Conditions": [],
+         "Boundary Conditions": ["Injection/Producer", "Aquifer"],
+         "Numerical Methods": [],
+         "Output Configuration": ["Interval", "Variables"]}
