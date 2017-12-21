@@ -1,12 +1,11 @@
-fields = ["Initial Conditions", "Fluids", "Permeability Camp", "Wells", "Mesh"]
-parameter_list = [["Area", "Area"], ["Height", "Length"],
-                  ["Initial Pressure", "Pressure"],
-                  ["Barometric Pressure", "Pressure"]]
+units_systems = ["SI", "Imperial Units", "Field Units"]
+reservoir = [["Area", "Area"], ["Height", "Length"]]
 mesh = [["Initial Saturation", "Dimensionless"], ["X", "Length"],
         ["Y", "Length"], ["Z", "Length"]]
-permcamp = [["Porosity", "Dimensionless"], ["Permeability", "Permeability"]]
+well = [["X", "Length"], ["Y", "Length"], ["Time", "Time"]]
 fluids = [["Viscosity", "Viscosity"], ["Density", "Density"]]
-units_systems = ["SI", "Imperial Units", "Field Units"]
+initial = [["Initial Pressure", "Pressure"],
+           ["Barometric Pressure", "Pressure"]]
 si_units = {"Area": ["meter ** 2"],
             "Density": ["kilogram / meter ** 3"],
             "Length": ["meter"],
@@ -59,17 +58,13 @@ start_unit = {"Area": "",
               "Viscosity": "",
               "Permeability": "",
               "Dimensionless": ""}
-roots = ["Problem", "Physical/Mathematical Model", "Geometry",
-         "Wells (Geometry)", "Physical Properties", "Analisys Interval",
-         "Initial Conditions", "Boundary Conditions", "Numerical Methods",
-         "Output Configuration"]
-leafs = {"Problem": ["Dimensionality"],
-         "Physical/Mathematical Model": ["Reservoir"],
-         "Geometry": ["Mesh"],
-         "Wells (Geometry)": [],
-         "Physical Properties": ["Rock (K, Φ)", "Fluid", "Rock (Flux, ρ, k)"],
-         "Analisys Interval": [] ,
-         "Initial Conditions": [],
-         "Boundary Conditions": ["Injection/Producer", "Aquifer"],
-         "Numerical Methods": [],
-         "Output Configuration": ["Interval", "Variables"]}
+entries = {"Problem": ["Dimensionality"],
+           "Physical/Mathematical Model": ["Reservoir"],
+           "Geometry": ["Mesh"],
+           "Wells (Geometry)": [],
+           "Physical Properties": ["Rock (K, Φ)", "Fluid", "Rock (Flux, ρ, k)"],
+           "Analisys Interval": [],
+           "Initial Conditions": [],
+           "Boundary Conditions": ["Injection/Producer", "Aquifer"],
+           "Numerical Methods": [],
+           "Output Configuration": ["Interval", "Variables"]}
