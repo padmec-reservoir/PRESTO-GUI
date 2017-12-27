@@ -6,6 +6,7 @@ from parameters import (entries, problem, model, geometry, well, properties,
                         analisys_interval, initial_conditions, boundary,
                         method, output)
 
+
 class MyTree(QTreeWidget):
     def __init__(self, parent, name):
         super(MyTree, self).__init__(parent)
@@ -170,7 +171,7 @@ class MyTree(QTreeWidget):
                 i += 1
         cur.screen.hide()
 
-    def make_well(self, clkd, name = ""):
+    def make_well(self, clkd, name=""):
         cur = self.roots["Wells (Geometry)"]
         if not name:
             name = "Well "+str(len(cur.itens) + 1)

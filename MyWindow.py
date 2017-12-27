@@ -5,6 +5,7 @@ from MyTree import MyTree
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QGridLayout, QFileDialog)
 from PyQt5.QtGui import QIcon
 
+
 class MyWindow(QMainWindow):
     def __init__(self):
         super(MyWindow, self).__init__()
