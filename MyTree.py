@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import (QTreeWidget, QWidget, QGridLayout, QPushButton,
-                             QLabel, QLineEdit, QComboBox)
+                             QLabel, QLineEdit, QComboBox, QCheckBox,
+                             QButtonGroup)
 from PyQt5.QtCore import Qt
 from MyTreeItem import MyTreeItem
 from parameters import (entries, problem, model, geometry, well, properties,
-                        analisys_interval, initial_conditions, boundary,
-                        method, output)
+                        initial_conditions, boundary, method, output)
 
 
 class MyTree(QTreeWidget):
@@ -55,17 +55,16 @@ class MyTree(QTreeWidget):
                 i += 1
         if name == "Physical/Mathematical Model":
             cur.name = model
-            cur.labels = {}
-            cur.inputs = {}
-            cur.boxes = {}
+            cur.model = ""
+            cur.button_group = QButtonGroup(cur.screen)
+            cur.button_group.buttonClicked.connect(self.update_model)
+            cur.button_group.setExclusive(True)
+            cur.buttons = {}
             i = 1
             for x in cur.name:
-                cur.labels[x[0]] = QLabel(x[0], cur.screen)
-                cur.inputs[x[0]] = QLineEdit(cur.screen)
-                cur.boxes[x[0]] = QComboBox(cur.screen)
-                cur.screen.layout.addWidget(cur.labels[x[0]], i, 1)
-                cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
-                cur.screen.layout.addWidget(cur.boxes[x[0]], i, 3)
+                cur.buttons[x] = QCheckBox(x, cur.screen)
+                cur.button_group.addButton(cur.buttons[x])
+                cur.screen.layout.addWidget(cur.buttons[x], i, 1)
                 i += 1
         if name == "Geometry":
             cur.name = geometry
@@ -87,20 +86,6 @@ class MyTree(QTreeWidget):
             cur.screen.layout.addWidget(cur.buttom, 1, 1)
         if name == "Physical Properties":
             cur.name = properties
-            cur.labels = {}
-            cur.inputs = {}
-            cur.boxes = {}
-            i = 1
-            for x in cur.name:
-                cur.labels[x[0]] = QLabel(x[0], cur.screen)
-                cur.inputs[x[0]] = QLineEdit(cur.screen)
-                cur.boxes[x[0]] = QComboBox(cur.screen)
-                cur.screen.layout.addWidget(cur.labels[x[0]], i, 1)
-                cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
-                cur.screen.layout.addWidget(cur.boxes[x[0]], i, 3)
-                i += 1
-        if name == "Analisys Interval":
-            cur.name = analisys_interval
             cur.labels = {}
             cur.inputs = {}
             cur.boxes = {}
@@ -143,17 +128,16 @@ class MyTree(QTreeWidget):
                 i += 1
         if name == "Numerical Methods":
             cur.name = method
-            cur.labels = {}
-            cur.inputs = {}
-            cur.boxes = {}
+            cur.methods = set()
+            cur.button_group = QButtonGroup(cur.screen)
+            cur.button_group.buttonClicked.connect(cur.update_method)
+            cur.button_group.setExclusive(False)
+            cur.buttons = {}
             i = 1
             for x in cur.name:
-                cur.labels[x[0]] = QLabel(x[0], cur.screen)
-                cur.inputs[x[0]] = QLineEdit(cur.screen)
-                cur.boxes[x[0]] = QComboBox(cur.screen)
-                cur.screen.layout.addWidget(cur.labels[x[0]], i, 1)
-                cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
-                cur.screen.layout.addWidget(cur.boxes[x[0]], i, 3)
+                cur.buttons[x] = QCheckBox(x, cur.screen)
+                cur.button_group.addButton(cur.buttons[x])
+                cur.screen.layout.addWidget(cur.buttons[x], i, 1)
                 i += 1
         if name == "Output Configuration":
             cur.name = output
@@ -203,7 +187,7 @@ class MyTree(QTreeWidget):
         cur.delbut = QPushButton("Delete Well", cur.screen)
         cur.delbut.clicked.connect(self.delete_well)
         cur.screen.layout.addWidget(cur.delbut, i, 1)
-        self.roots["Problem"].update_unit_list(None)
+        self.roots["Problem"].itens["Unit System"].update_unit_list(None)
 
     def get_selected(self):
         for x in self.roots.values():
@@ -233,11 +217,8 @@ class MyTree(QTreeWidget):
         cur.setText(0, text)
         self.roots["Wells (Geometry)"].itens[text] = cur
 
-    def get_units(self):
-        return [x for x in self.roots["Problem"].itens["Dimensionality"].units]
-
-    def load_units(self, units):
-        cur = self.roots["Problem"].itens["Dimensionality"]
-        for system in units:
-            cur.buttons[system].setChecked(True)
-        self.roots["Problem"].update_unit_list(None)
+    def update_model(self, button):
+        cur = self.roots["Physical/Mathematical Model"]
+        for x in cur.buttons.values():
+            if x.isChecked():
+                cur.model = x.text()

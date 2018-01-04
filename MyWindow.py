@@ -47,7 +47,6 @@ class MyWindow(QMainWindow):
         if not name[0]:
             return
         arq = ConfigObj(name[0])
-        arq["Units"] = self.tree.get_units()
         for x in self.tree.roots:
             cur = self.tree.roots[x]
             arq[x] = {}
@@ -66,8 +65,24 @@ class MyWindow(QMainWindow):
         if not name[0]:
             return
         arq = ConfigObj(name[0])
-        self.tree.load_units(arq["Units"])
-        del(arq["Units"])
+
+        values = arq["Problem"]["Unit System"]["values"]
+        self.tree.roots["Problem"].itens["Unit System"].set_data(values, "")
+        values = arq["Problem"]["Dimensionality"]["values"]
+        self.tree.roots["Problem"].itens["Dimensionality"].set_data(values, "")
+        self.tree.roots["Problem"].set_data({}, {})
+        del(arq["Problem"])
+
+        for well in arq["Wells (Geometry)"]:
+            if (well not in ["values", "units"]):
+                self.tree.make_well(None, well)
+                cur = self.tree.roots["Wells (Geometry)"].itens[well]
+                values = arq["Wells (Geometry)"][well]["values"]
+                units = arq["Wells (Geometry)"][well]["units"]
+                cur.set_data(values, units)
+        self.tree.roots["Wells (Geometry)"].set_data({}, {})
+        del(arq["Wells (Geometry)"])
+
         for x in arq:
             cur = self.tree.roots[x]
             values = arq[x]["values"]
@@ -75,8 +90,6 @@ class MyWindow(QMainWindow):
             cur.set_data(values, units)
             sub = [k for k in arq[x] if (k != "values" and k != "units")]
             for y in sub:
-                if (x == "Wells (Geometry)"):
-                    self.tree.make_well(None, y)
                 values = arq[x][y]["values"]
                 units = arq[x][y]["units"]
                 cur.itens[y].set_data(values, units)

@@ -1,26 +1,41 @@
 problem = []
-model = []
-geometry = []
+model = ["Monophasic", "Biphasic", "Compositional", "Black Oil"]
+geometry = [["Length X", "Length"], ["Length Y", "Length"],
+            ["Length Z", "Length"]]
 well = [["X", "Length"], ["Y", "Length"], ["Z", "Length"], ["Time", "Time"]]
 properties = []
-analisys_interval = []
 initial_conditions = [["Initial Pressure", "Pressure"],
+                      ["Initial Saturation", "Dimensionless"],
                       ["Barometric Pressure", "Pressure"]]
 boundary = []
-method = []
+method = ["Finite Difference"]
 output = []
+dimensionality = ["1D", "2D", "3D"]
 units_systems = ["SI", "Imperial Units", "Field Units"]
 reservoir = [["Area", "Area"], ["Height", "Length"]]
-mesh = [["Initial Saturation", "Dimensionless"], ["X", "Length"],
-        ["Y", "Length"], ["Z", "Length"]]
-rock_1 = []
+mesh = [["Steps in X", "Dimensionless"], ["Steps in Y", "Dimensionless"],
+        ["Steps in Z", "Dimensionless"]]
+rock_1 = [["Absolute Permeability", "Permeability"],
+          ["Porosity", "Dimensionless"]]
 fluids = [["Oil Viscosity", "Viscosity"], ["Oil Density", "Density"],
-          ["Water Viscosity", "Viscosity"], ["Water Density", "Density"]]
+          ["Water Viscosity", "Viscosity"], ["Water Density", "Density"],
+          ["Gas Viscosity", "Viscosity"], ["Gas Density", "Density"]]
 rock_2 = []
 injection_producer = []
 aquifer = []
-interval = []
-variables = []
+interval = [["From", "Time"], ["To", "Time"]]
+variables = ["Water Saturation", "Oil Saturation", "Gas Saturation",
+             "Pressure Camp"]
+entries = {"Problem": ["Dimensionality", "Unit System"],
+           "Physical/Mathematical Model": ["Reservoir"],
+           "Geometry": ["Mesh"],
+           "Wells (Geometry)": [],
+           "Physical Properties": ["Rock (K, O)", "Fluid",
+                                   "Rock (Flux, p, k)"],
+           "Initial Conditions": [],
+           "Boundary Conditions": ["Injection/Producer", "Aquifer"],
+           "Numerical Methods": [],
+           "Output Configuration": ["Interval", "Variables"]}
 
 si_units = {"Area": ["meter ** 2"],
             "Density": ["kilogram / meter ** 3"],
@@ -74,14 +89,3 @@ start_unit = {"Area": set(),
               "Viscosity": set(),
               "Permeability": set(),
               "Dimensionless": set()}
-entries = {"Problem": ["Dimensionality"],
-           "Physical/Mathematical Model": ["Reservoir"],
-           "Geometry": ["Mesh"],
-           "Wells (Geometry)": [],
-           "Physical Properties": ["Rock (K, O)", "Fluid",
-                                   "Rock (Flux, p, k)"],
-           "Analisys Interval": [],
-           "Initial Conditions": [],
-           "Boundary Conditions": ["Injection/Producer", "Aquifer"],
-           "Numerical Methods": [],
-           "Output Configuration": ["Interval", "Variables"]}
