@@ -329,15 +329,15 @@ class MyTreeItem(QTreeWidgetItem):
 
         if cur.dimensions == "1D":
             geometry_open = ["Length X"]
-            mesh_open = ["Steps in X"]
+            mesh_open = ["Blocks in X"]
             well_open = ["X"]
         if cur.dimensions == "2D":
             geometry_open = ["Length X", "Length Y"]
-            mesh_open = ["Steps in X", "Steps in Y"]
+            mesh_open = ["Blocks in X", "Blocks in Y"]
             well_open = ["X", "Y"]
         if cur.dimensions == "3D":
             geometry_open = ["Length X", "Length Y", "Length Z"]
-            mesh_open = ["Steps in X", "Steps in Y", "Steps in Z"]
+            mesh_open = ["Blocks in X", "Blocks in Y", "Blocks in Z"]
             well_open = ["X", "Y", "Z"]
 
         for x in up.roots["Geometry"].inputs:

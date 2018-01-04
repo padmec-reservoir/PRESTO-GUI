@@ -1,5 +1,5 @@
 problem = []
-model = ["Monophasic", "Biphasic", "Compositional", "Black Oil"]
+model = ["Monophasic", "Two Phase", "Compositional", "Black Oil"]
 geometry = [["Length X", "Length"], ["Length Y", "Length"],
             ["Length Z", "Length"]]
 well = [["X", "Length"], ["Y", "Length"], ["Z", "Length"], ["Time", "Time"]]
@@ -13,8 +13,8 @@ output = []
 dimensionality = ["1D", "2D", "3D"]
 units_systems = ["SI", "Imperial Units", "Field Units"]
 reservoir = [["Area", "Area"], ["Height", "Length"]]
-mesh = [["Steps in X", "Dimensionless"], ["Steps in Y", "Dimensionless"],
-        ["Steps in Z", "Dimensionless"]]
+mesh = [["Blocks in X", "Dimensionless"], ["Blocks in Y", "Dimensionless"],
+        ["Blocks in Z", "Dimensionless"]]
 rock_1 = [["Absolute Permeability", "Permeability"],
           ["Porosity", "Dimensionless"]]
 fluids = [["Oil Viscosity", "Viscosity"], ["Oil Density", "Density"],
@@ -25,12 +25,12 @@ injection_producer = []
 aquifer = []
 interval = [["From", "Time"], ["To", "Time"]]
 variables = ["Water Saturation", "Oil Saturation", "Gas Saturation",
-             "Pressure Camp"]
+             "Pressure Field"]
 entries = {"Problem": ["Dimensionality", "Unit System"],
            "Physical/Mathematical Model": ["Reservoir"],
            "Geometry": ["Mesh"],
            "Wells (Geometry)": [],
-           "Physical Properties": ["Rock (K, O)", "Fluid",
+           "Physical Properties": ["Rock", "Fluid",
                                    "Rock (Flux, p, k)"],
            "Initial Conditions": [],
            "Boundary Conditions": ["Injection/Producer", "Aquifer"],
