@@ -30,6 +30,14 @@ class MyTree(QTreeWidget):
         main.addWidget(cur.screen, 1, 2)
         cur.screen.show()
 
+    def get_selected(self):
+        for x in self.roots.values():
+            if x.isSelected():
+                return x
+            elif x.get_selected():
+                return x.get_selected()
+        return 0
+
     def update_units(self, units):
         for x in self.roots:
             self.roots[x].update_units(units)
@@ -165,6 +173,17 @@ class MyTree(QTreeWidget):
         cur.screen = QWidget()
         cur.screen.layout = QGridLayout(cur.screen)
         cur.screen.layout.setAlignment(Qt.AlignTop)
+        cur.button_group = QButtonGroup(cur.screen)
+        cur.button_group.buttonClicked.connect(self.update_well_type)
+        cur.button_group.setExclusive(True)
+        cur.buttons = {}
+        i = 1
+        for x in ["Injection", "Producer"]:
+            cur.buttons[x] = QCheckBox(x, cur.screen)
+            cur.button_group.addButton(cur.buttons[x])
+            cur.screen.layout.addWidget(cur.buttons[x], 1, i)
+            i += 1
+        cur.type = ""
         cur.name = well
         cur.labels = {}
         cur.inputs = {}
@@ -173,9 +192,9 @@ class MyTree(QTreeWidget):
         cur.inputs["Rename"] = QLineEdit(cur.screen)
         cur.inputs["Rename"].setText(name)
         cur.inputs["Rename"].textEdited.connect(self.update_well_name)
-        cur.screen.layout.addWidget(cur.labels["Rename"], 1, 1)
-        cur.screen.layout.addWidget(cur.inputs["Rename"], 1, 2)
-        i = 2
+        cur.screen.layout.addWidget(cur.labels["Rename"], 2, 1)
+        cur.screen.layout.addWidget(cur.inputs["Rename"], 2, 2)
+        i = 3
         for x in cur.name:
             cur.labels[x[0]] = QLabel(x[0], cur.screen)
             cur.inputs[x[0]] = QLineEdit(cur.screen)
@@ -189,13 +208,14 @@ class MyTree(QTreeWidget):
         cur.screen.layout.addWidget(cur.delbut, i, 1)
         self.roots["Problem"].itens["Unit System"].update_unit_list(None)
 
-    def get_selected(self):
-        for x in self.roots.values():
-            if x.isSelected():
-                return x
-            elif x.get_selected():
-                return x.get_selected()
-        return 0
+    def update_well_type(self, clkd):
+        cur = self.roots["Wells (Geometry)"].itens
+        well = None
+        for x in cur.values():
+            if clkd in x.buttons.values():
+                well = x
+                break
+        well.type = clkd.text()
 
     def delete_well(self):
         cur = self.roots["Wells (Geometry)"]

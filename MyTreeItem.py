@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (QTreeWidgetItem, QWidget, QGridLayout, QLabel,
                              QLineEdit, QComboBox, QCheckBox, QButtonGroup)
 from PyQt5.QtCore import Qt
-from parameters import (units_systems, reservoir, mesh, rock_1, fluids, rock_2,
+from parameters import (units_systems, reservoir, mesh, rock, fluids,
                         injection_producer, aquifer, interval, variables,
                         si_units, imperial_units, field_units, start_unit,
                         dimensionality)
@@ -90,8 +90,8 @@ class MyTreeItem(QTreeWidgetItem):
                 cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
                 cur.screen.layout.addWidget(cur.boxes[x[0]], i, 3)
                 i += 1
-        if name == "Rock (K, O)":
-            cur.name = rock_1
+        if name == "Rock":
+            cur.name = rock
             cur.labels = {}
             cur.inputs = {}
             cur.boxes = {}
@@ -115,30 +115,17 @@ class MyTreeItem(QTreeWidgetItem):
                     cur.labels["Oil"] = QLabel("Oil", cur.screen)
                     cur.screen.layout.addWidget(cur.labels["Oil"], 1, 1)
                     i += 1
-                if(i == 4):
+                elif(i == 4):
                     cur.labels["Water"] = QLabel("Water", cur.screen)
                     cur.screen.layout.addWidget(cur.labels["Water"], i, 1)
                     i += 1
-                if(i == 7):
+                elif(i == 7):
                     cur.labels["Gas"] = QLabel("Gas", cur.screen)
                     cur.screen.layout.addWidget(cur.labels["Gas"], i, 1)
                     i += 1
                 cur.labels[x[0]] = QLabel(x[0], cur.screen)
                 cur.inputs[x[0]] = QLineEdit(cur.screen)
-                cur.boxes[x[0]] = QComboBox(cur.screen)
-                cur.screen.layout.addWidget(cur.labels[x[0]], i, 1)
-                cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
-                cur.screen.layout.addWidget(cur.boxes[x[0]], i, 3)
-                i += 1
-        if name == "Rock (Flux, p, k)":
-            cur.name = rock_2
-            cur.labels = {}
-            cur.inputs = {}
-            cur.boxes = {}
-            i = 1
-            for x in cur.name:
-                cur.labels[x[0]] = QLabel(x[0], cur.screen)
-                cur.inputs[x[0]] = QLineEdit(cur.screen)
+                cur.inputs[x[0]].textEdited.connect(self.update_fluid)
                 cur.boxes[x[0]] = QComboBox(cur.screen)
                 cur.screen.layout.addWidget(cur.labels[x[0]], i, 1)
                 cur.screen.layout.addWidget(cur.inputs[x[0]], i, 2)
@@ -255,6 +242,12 @@ class MyTreeItem(QTreeWidgetItem):
         else:
             units = {}
             try:
+                if self.parent.text(0) == "Wells (Geometry)":
+                    values["Type"] = self.type
+                    units["Type"] = ""
+            except AttributeError:
+                pass
+            try:
                 for x in self.inputs:
                     try:
                         values[x] = float(self.inputs[x].text())
@@ -275,15 +268,21 @@ class MyTreeItem(QTreeWidgetItem):
         name = self.text(0)
         if name == "Dimensionality":
             self.dimensions = values
-            self.buttons[values].setChecked(True)
-            self.update_dimensionality(None)
+            try:
+                self.buttons[values].setChecked(True)
+                self.update_dimensionality(None)
+            except KeyError:
+                pass
         elif name == "Unit System":
             for system in values:
                 self.buttons[system].setChecked(True)
             self.update_unit_list(None)
         elif name == "Physical/Mathematical Model":
             self.model = values
-            self.buttons[values].setChecked(True)
+            try:
+                self.buttons[values].setChecked(True)
+            except KeyError:
+                pass
         elif name == "Numerical Methods":
             for method in values:
                 self.buttons[method].setChecked(True)
@@ -294,6 +293,14 @@ class MyTreeItem(QTreeWidgetItem):
             self.update_variables(None)
         else:
             old_boxes = {}
+            try:
+                if self.parent.text(0) == "Wells (Geometry)":
+                    self.type = values["Type"]
+                    self.buttons[self.type].setChecked(True)
+                    del(values["Type"])
+                    del(units["Type"])
+            except AttributeError:
+                pass
             try:
                 for x in self.boxes:
                     old_boxes[x] = self.boxes[x].blockSignals(True)
@@ -368,3 +375,30 @@ class MyTreeItem(QTreeWidgetItem):
                 self.methods.add(x.text())
             else:
                 self.methods.discard(x.text())
+
+    def update_fluid(self, text):
+        cur = self.itens["Fluid"]
+        i = 0
+        for x in cur.inputs.values():
+            x.setEnabled(True)
+            if x.text() != "":
+                i += 1
+        if i == 0:
+            return
+        model = self.parent.roots["Physical/Mathematical Model"].model
+        if model == "Monophasic":
+            fluid = ""
+            for x in cur.inputs:
+                if cur.inputs[x].hasFocus():
+                    fluid = x.split()[0]
+                else:
+                    cur.inputs[x].setEnabled(False)
+            for x in cur.inputs:
+                if fluid in x:
+                    cur.inputs[x].setEnabled(True)
+        if model == "Two Phase":
+            pass
+        if model == "Compositional":
+            pass
+        if model == "Black Oil":
+            pass

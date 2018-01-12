@@ -2,11 +2,11 @@ problem = []
 model = ["Monophasic", "Two Phase", "Compositional", "Black Oil"]
 geometry = [["Length X", "Length"], ["Length Y", "Length"],
             ["Length Z", "Length"]]
-well = [["X", "Length"], ["Y", "Length"], ["Z", "Length"], ["Time", "Time"]]
+well = [["X", "Length"], ["Y", "Length"], ["Z", "Length"],
+        ["Diameter", "Length"], ["Rate", "Pressure"]]
 properties = []
 initial_conditions = [["Initial Pressure", "Pressure"],
-                      ["Initial Saturation", "Dimensionless"],
-                      ["Barometric Pressure", "Pressure"]]
+                      ["Initial Saturation", "Dimensionless"]]
 boundary = []
 method = ["Finite Difference"]
 output = []
@@ -15,12 +15,12 @@ units_systems = ["SI", "Imperial Units", "Field Units"]
 reservoir = [["Area", "Area"], ["Height", "Length"]]
 mesh = [["Blocks in X", "Dimensionless"], ["Blocks in Y", "Dimensionless"],
         ["Blocks in Z", "Dimensionless"]]
-rock_1 = [["Absolute Permeability", "Permeability"],
-          ["Porosity", "Dimensionless"]]
+rock = [["Absolute Permeability", "Permeability"],
+        ["Relative Permeability", "Permeability"],
+        ["Porosity", "Dimensionless"], ["Density", "Density"]]
 fluids = [["Oil Viscosity", "Viscosity"], ["Oil Density", "Density"],
           ["Water Viscosity", "Viscosity"], ["Water Density", "Density"],
           ["Gas Viscosity", "Viscosity"], ["Gas Density", "Density"]]
-rock_2 = []
 injection_producer = []
 aquifer = []
 interval = [["From", "Time"], ["To", "Time"]]
@@ -30,8 +30,7 @@ entries = {"Problem": ["Dimensionality", "Unit System"],
            "Physical/Mathematical Model": ["Reservoir"],
            "Geometry": ["Mesh"],
            "Wells (Geometry)": [],
-           "Physical Properties": ["Rock", "Fluid",
-                                   "Rock (Flux, p, k)"],
+           "Physical Properties": ["Rock", "Fluid"],
            "Initial Conditions": [],
            "Boundary Conditions": ["Injection/Producer", "Aquifer"],
            "Numerical Methods": [],
