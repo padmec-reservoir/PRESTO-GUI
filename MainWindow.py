@@ -14,27 +14,17 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon('presto-logo2.png'))
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu("&File")
-        self.file_menu.addAction(
-            MenuAction(
-                self,
-                "&Exit",
-                "Ctrl+Q",
-                "Leave the app",
-                exit))
-        self.file_menu.addAction(
-            MenuAction(
-                self,
-                "&Save File...",
-                "Ctrl+S",
-                "Save current parameters",
-                self.save_file))
-        self.file_menu.addAction(
-            MenuAction(
-                self,
-                "&Open File...",
-                "Ctrl+O",
-                "Open existing parameter file",
-                self.open_file))
+        self.exit_action = MenuAction(self, "&Exit", "Ctrl+Q", "Leave the app",
+                                      exit)
+        self.save_action = MenuAction(self, "&Save File...", "Ctrl+S",
+                                      "Save current parameters",
+                                      self.save_file)
+        self.open_action = MenuAction(self, "&Open File...", "Ctrl+O",
+                                      "Open existing parameter file",
+                                      self.open_file)
+        self.file_menu.addAction(self.exit)
+        self.file_menu.addAction(self.save)
+        self.file_menu.addAction(self.open)
         self.statusBar()
         self.main_widget = QWidget(self)
         self.main_widget.layout = QGridLayout(self.main_widget)
