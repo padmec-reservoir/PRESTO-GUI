@@ -1,9 +1,9 @@
 from PyQt5.QtWidgets import QAction
 
 
-class MyAction(QAction):
+class MenuAction(QAction):
     def __init__(self, parent, name, shortcut, status, function):
-        super(MyAction, self).__init__(name, parent)
+        super(MenuAction, self).__init__(name, parent)
         self.setShortcut(shortcut)
         self.setStatusTip(status)
         self.triggered.connect(function)

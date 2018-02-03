@@ -2,20 +2,20 @@ from PyQt5.QtWidgets import (QTreeWidget, QWidget, QGridLayout, QPushButton,
                              QLabel, QLineEdit, QComboBox, QCheckBox,
                              QButtonGroup)
 from PyQt5.QtCore import Qt
-from MyTreeItem import MyTreeItem
+from TreeItem import TreeItem
 from parameters import (entries, problem, model, geometry, well, properties,
                         initial_conditions, boundary, method, output)
 
 
-class MyTree(QTreeWidget):
+class MainTree(QTreeWidget):
     def __init__(self, parent, name):
-        super(MyTree, self).__init__(parent)
+        super(MainTree, self).__init__(parent)
         self.parent = parent
         self.setHeaderLabel(name)
         self.itemClicked.connect(self.update_screen)
         self.roots = {}
         for x in entries:
-            self.roots[x] = MyTreeItem(self, x, entries[x])
+            self.roots[x] = TreeItem(self, x, entries[x])
             self.addTopLevelItem(self.roots[x])
             self.make_screen(x)
 
@@ -167,7 +167,7 @@ class MyTree(QTreeWidget):
         cur = self.roots["Wells (Geometry)"]
         if not name:
             name = "Well "+str(len(cur.itens) + 1)
-        cur.itens[name] = MyTreeItem(cur, name, [])
+        cur.itens[name] = TreeItem(cur, name, [])
         cur.addChild(cur.itens[name])
         cur = cur.itens[name]
         cur.screen = QWidget()

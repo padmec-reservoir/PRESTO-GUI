@@ -7,19 +7,19 @@ from parameters import (units_systems, reservoir, mesh, rock, fluids,
                         dimensionality)
 
 
-class MyTreeItem(QTreeWidgetItem):
+class TreeItem(QTreeWidgetItem):
     def __init__(self, parent, name, leafs):
-        super(MyTreeItem, self).__init__(parent, [name])
+        super(TreeItem, self).__init__(parent, [name])
         self.parent = parent
         self.itens = {}
         if isinstance(leafs, dict):
             for x in leafs:
-                self.itens[x] = MyTreeItem(self, x, leafs[x])
+                self.itens[x] = TreeItem(self, x, leafs[x])
                 self.addChild(self.itens[x])
                 self.make_screen(x)
         else:
             for x in leafs:
-                self.itens[x] = MyTreeItem(self, x, [])
+                self.itens[x] = TreeItem(self, x, [])
                 self.addChild(self.itens[x])
                 self.make_screen(x)
 

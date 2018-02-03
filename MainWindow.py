@@ -1,35 +1,35 @@
 from sys import exit
 from configobj import ConfigObj
-from MyAction import MyAction
-from MyTree import MyTree
+from MenuAction import MenuAction
+from MainTree import MainTree
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QGridLayout, QFileDialog)
 from PyQt5.QtGui import QIcon
 
 
-class MyWindow(QMainWindow):
+class MainWindow(QMainWindow):
     def __init__(self):
-        super(MyWindow, self).__init__()
+        super(MainWindow, self).__init__()
         self.setGeometry(50, 50, 1000, 500)
         self.setWindowTitle("PRESTO - Python Reservoir Simulation Toolbox")
         self.setWindowIcon(QIcon('presto-logo2.png'))
         self.main_menu = self.menuBar()
         self.file_menu = self.main_menu.addMenu("&File")
         self.file_menu.addAction(
-            MyAction(
+            MenuAction(
                 self,
                 "&Exit",
                 "Ctrl+Q",
                 "Leave the app",
                 exit))
         self.file_menu.addAction(
-            MyAction(
+            MenuAction(
                 self,
                 "&Save File...",
                 "Ctrl+S",
                 "Save current parameters",
                 self.save_file))
         self.file_menu.addAction(
-            MyAction(
+            MenuAction(
                 self,
                 "&Open File...",
                 "Ctrl+O",
@@ -38,7 +38,7 @@ class MyWindow(QMainWindow):
         self.statusBar()
         self.main_widget = QWidget(self)
         self.main_widget.layout = QGridLayout(self.main_widget)
-        self.tree = MyTree(self, "PRESTO GUI")
+        self.tree = MainTree(self, "PRESTO GUI")
         self.main_widget.layout.addWidget(self.tree, 1, 1)
         self.setCentralWidget(self.main_widget)
 
