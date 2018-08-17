@@ -22,9 +22,9 @@ class MainWindow(QMainWindow):
         self.open_action = MenuAction(self, "&Open File...", "Ctrl+O",
                                       "Open existing parameter file",
                                       self.open_file)
-        self.file_menu.addAction(self.exit)
-        self.file_menu.addAction(self.save)
-        self.file_menu.addAction(self.open)
+        self.file_menu.addAction(self.exit_action)
+        self.file_menu.addAction(self.save_action)
+        self.file_menu.addAction(self.open_action)
         self.statusBar()
         self.main_widget = QWidget(self)
         self.main_widget.layout = QGridLayout(self.main_widget)
