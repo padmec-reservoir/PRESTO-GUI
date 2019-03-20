@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>PRESTO - Python Reservoir Simulation Toolbox</title>
+
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/nativize.css">
+  <link rel="stylesheet" href="assets/css/global.css">
+  <link rel="stylesheet" href="assets/css/about.css">
+  <link rel="stylesheet" href="assets/css/nav.css">
+  <link rel="stylesheet" href="assets/css/section.css">
+  <link rel="stylesheet" href="assets/css/demo.css">
+  <link rel="stylesheet" href="assets/css/github.css">
+
+  <link rel="import" href="sections/problem.html">
+  <link rel="import" href="sections/physical-model.html">
+  <link rel="import" href="sections/reservoir.html">
+  <link rel="import" href="sections/wells.html">
+  <link rel="import" href="sections/flux-condition.html">
+  <link rel="import" href="sections/numerical-methods.html">
+</head>
+<body>
+  <nav class="nav js-nav">
+    <header class="nav-header">
+      <h1 class="nav-title"><strong>PRESTO</strong></h1>
+    </header>
+
+    <div class="nav-item u-category-native-ui">
+      <button type="button" id="button-problem" data-section="problem" class="nav-button"><em>Problem</em></button>
+      <button type="button" id="button-physical-model" data-section="physical-model" class="nav-button"><em>Physical Model</em></button>
+      <button type="button" id="button-reservoir" data-section="reservoir" class="nav-button"><em>Reservoir Properties</em></button>
+      <button type="button" id="button-wells" data-section="wells" class="nav-button"><em>Wells</em></button>
+      <button type="button" id="button-flux-conditon" data-section="flux-condition" class="nav-button"><em>Flux Conditions</em></button>
+      <button type="button" id="button-numerical-methods" data-section="numerical-methods" class="nav-button"><em>Numerical Methods</em></button>
+    </div>
+  </nav>
+
+  <main class="content js-content"></main>
+
+  <script>
+    require('./assets/imports')
+    require('./assets/ex-links')
+    require('./assets/nav')
+    require('./assets/demo-btns')
+    require('./assets/code-blocks')
+    require('./assets/normalize-shortcuts')
+  </script>
+</body>
+</html>
