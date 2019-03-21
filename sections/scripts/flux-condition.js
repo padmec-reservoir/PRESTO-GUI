@@ -3,7 +3,7 @@ var count = 0;
 function addFluxCondition () {
     var sectionHeaderElem = document.getElementById("flux-condition-section");
     var newSectionElem = document.createElement("div");
-    newSectionElem.className = "section-wrapper";
+    newSectionElem.className = "subsection-wrapper";
     newSectionElem.id = `flux-condition-${count}`;
     newSectionElem.innerHTML = `<h3>Geometry</h3>
         X interval <input type="text" name="flux-condition-upper-x" placeholder="Start..."> - <input type="text" name="flux-condition-lower-x" placeholder="End..."><br>

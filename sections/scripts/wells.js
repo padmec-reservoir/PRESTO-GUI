@@ -3,7 +3,7 @@ var count = 0;
 function addWell () {
     var sectionHeaderElem = document.getElementById("wells-section");
     var newSectionElem = document.createElement("div");
-    newSectionElem.className = "section-wrapper";
+    newSectionElem.className = "subsection-wrapper";
     newSectionElem.id = `well-${count}`;
     newSectionElem.innerHTML = `<h3>Label</h3>
         <input type="text" name="well-label" value="Well ${count}"><br><br>
@@ -13,7 +13,7 @@ function addWell () {
         Area <input type="text" name="well-area"><br>
         Height <input type="text" name="well-height"><br><br>
         <h3>Properties</h3>
-        <input type="radio" name="well-type" value="injection"> Injection <input type="radio" name="well-type" value="production"> Production <br>
+        <input type="radio" name="well-type" value="injection"> Injection <input type="radio" name="well-type" value="production"> Production <br><br>
         Pressure <input type="text" name="well-pressure"><br><br>
         <button type="button" name="remove-well" onclick="removeWell(this.parentElement.id)">Remove well</button>`;
     sectionHeaderElem.appendChild(newSectionElem);
