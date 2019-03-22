@@ -1,5 +1,4 @@
 const path = require('path');
-const {siUnits, imperialUnits, fieldUnits} = require('./sections/scripts/problem');
 
 var count = 0;
 
@@ -9,13 +8,31 @@ function addNewLayer () {
     newSectionElem.className = "subsection-wrapper";
     newSectionElem.id = `layer-${count}`;
     newSectionElem.innerHTML = `<h3>Layer Dimensions</h3>
-        Length <input type="text" name="reservoir-length"><select name="length-list"></select><br>
-        Width <input type="text" name="reservoir-width"><select name="length-list"></select><br>
-        Height <input type="text" name="reservoir-height"><select name="length-list"></select><br><br>
+        Length <input type="text" name="reservoir-length">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br>
+        Width <input type="text" name="reservoir-width">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br>
+        Height <input type="text" name="reservoir-height">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br><br>
         <h3>Block Dimensions</h3>
-        Length <input type="text" name="block-length"><select name="length-list"></select><br>
-        Width <input type="text" name="block-width"><select name="length-list"></select><br>
-        Height <input type="text" name="block-height"><select name="length-list"></select><br><br>
+        Length <input type="text" name="block-length">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br>
+        Width <input type="text" name="block-width">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br>
+        Height <input type="text" name="block-height">
+        <select name="length-list">
+            <option name="length-unit-option"></option>
+        </select><br><br>
         <h3>Rock Properties</h3>
         Absolute Permeability <input type="text" name="absolute-permeability"><br>
         Relative Permeability <input type="text" name="relative-permeability"><br>
@@ -36,12 +53,17 @@ function removeLayer (elemId) {
 
 function setUnits () {
     const unitSystemOptions = document.getElementsByName("unit-system");
-    // FIXME: Incorrect usage of Array.prototype.filter.
-    const unitSystemOptionChecked = Array.prototype.filter(unitSystemOptions, (e) => {
+    var unitSystemOptionChecked = Array.from(unitSystemOptions).filter((e) => {
         return e.checked == true;
     })[0];
-    var unitSystem;
 
+    // This is a workaround to the problem adding a layer before choosing
+    // an unit system. Should be done in a different way.
+    if (unitSystemOptionChecked == undefined) {
+        unitSystemOptionChecked = {value: ""};
+    }
+
+    var unitSystem;
     switch (unitSystemOptionChecked.value) {
         case "si":
             unitSystem = siUnits;
@@ -57,11 +79,9 @@ function setUnits () {
             break;
     }
 
-    const lengthElems = document.getElemntsByName("length-list");
-    Array.prototype.forEach(lengthElems, (e) => {
-        var tempElem = document.createElement("option");
-        tempElem.value = unitSystem.length;
-        tempElem.innerHTML = unitSystem.length;
-        e.appendChild(tempElem);
+    const lengthElems = document.getElementsByName("length-unit-option");
+    Array.prototype.forEach.call(lengthElems, (e) => {
+        e.value = unitSystem.length;
+        e.innerHTML = unitSystem.length;
     })
 }
