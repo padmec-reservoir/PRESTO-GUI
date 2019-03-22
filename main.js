@@ -15,8 +15,6 @@ let mainWindow = null
 function initialize () {
   makeSingleInstance()
 
-  loadDemos()
-
   function createWindow () {
     const windowOptions = {
       width: 1080,
@@ -82,12 +80,6 @@ function makeSingleInstance () {
       mainWindow.focus()
     }
   })
-}
-
-// Require each JS file in the main-process dir
-function loadDemos () {
-    const files = glob.sync(path.join(__dirname, 'main-process/**/*.js'));
-    files.forEach((file) => { require(file) });
 }
 
 initialize()
