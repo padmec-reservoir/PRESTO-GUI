@@ -5,6 +5,7 @@ require('update-electron-app')({
 const path = require('path')
 const glob = require('glob')
 const {app, BrowserWindow} = require('electron')
+const menu = require('./application-menu')
 
 const debug = /--debug/.test(process.argv[2])
 
@@ -14,8 +15,6 @@ let mainWindow = null
 
 function initialize () {
   makeSingleInstance()
-
-  createApplicationMenu();
 
   function createWindow () {
     const windowOptions = {
@@ -82,11 +81,6 @@ function makeSingleInstance () {
       mainWindow.focus()
     }
   })
-}
-
-function createApplicationMenu () {
-    const files = glob.sync(path.join(__dirname, 'application-menu.js'));
-    files.forEach((file) => { require(file) });
 }
 
 initialize()
