@@ -15,6 +15,8 @@ let mainWindow = null
 function initialize () {
   makeSingleInstance()
 
+  createApplicationMenu();
+
   function createWindow () {
     const windowOptions = {
       width: 1080,
@@ -80,6 +82,11 @@ function makeSingleInstance () {
       mainWindow.focus()
     }
   })
+}
+
+function createApplicationMenu () {
+    const files = glob.sync(path.join(__dirname, 'application-menu.js'));
+    files.forEach((file) => { require(file) });
 }
 
 initialize()

@@ -338,6 +338,7 @@ if (process.platform === 'win32') {
 app.on('ready', () => {
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
+  console.log("Menu created");
 })
 
 app.on('browser-window-created', () => {
